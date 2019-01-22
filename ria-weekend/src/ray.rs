@@ -20,16 +20,12 @@ impl Ray {
     }
 }
 
-// linear interpolation based on y coordinate
-// top to down
-fn linear_interpolate_y(ray: Ray) -> Vec3 {
-    let unit_direction = ray.direction().unit_vector();
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    // (1.0 - t) * start blend_color + t * end color
-    Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.0, 0.0, 0.0) * t
-}
+pub fn create_ray_demo<F>(buf: &mut String, dimensions: (u32, u32), op: F)
+where
+    F: Fn(Ray) -> Vec3,
+{
+    let (w, h) = dimensions;
 
-pub fn create_ray_demo(buf: &mut String, w: u32, h: u32) {
     // uses standard cg RHS notation
     // y up, z pointing outwards and x to right
     let lower_left_corner = Vec3::new(-1.0, -1.0, -1.0);
@@ -47,7 +43,7 @@ pub fn create_ray_demo(buf: &mut String, w: u32, h: u32) {
 
             let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
 
-            let color = linear_interpolate_y(ray);
+            let color = op(ray);
             let ir = (255.99 * color[0]) as u32;
             let ig = (255.99 * color[1]) as u32;
             let ib = (255.99 * color[2]) as u32;

@@ -1,41 +1,22 @@
 extern crate ria_weekend;
 
-use ria_weekend::ray;
-use std::error::Error;
-use std::fs::File;
-use std::{io, io::Write};
+use ria_weekend::{demo::Demo, ray, ray::Ray, vec3::Vec3};
 
 fn main() {
-    let mut height = 100;
-    let mut width = 200;
+    let demo = Demo::new("ray_demo");
+    let dimensions = demo.dimensions();
 
-    println!("Enter width and height seperated by space");
-
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("error in reading input");
-
-    let input = input
-        .trim()
-        .split(" ")
-        .map(|v| v.parse::<u32>().expect("error in parsing input"))
-        .collect::<Vec<u32>>();
-
-    if input.len() >= 2 {
-        height = input[1];
-        width = input[0];
-    }
-    let file_name = format!("ray_demo{}x{}.ppm", width, height);
-    let mut buf = format!("P3\n{} {}\n255\n", width, height);
-    let mut file = match File::create(&file_name) {
-        Ok(file) => file,
-        Err(e) => panic!("couldn't create {}: {}", file_name, e.description()),
+    let mut buf = String::new();
+    // linear interpolation based on y coordinate
+    // top to down
+    let linear_interpolate_y = |ray: Ray| -> Vec3 {
+        let unit_direction = ray.direction().unit_vector();
+        let t = 0.5 * (unit_direction.y() + 1.0);
+        // (1.0 - t) * start blend_color + t * end color
+        Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.0, 0.0, 0.0) * t
     };
-    ray::create_ray_demo(&mut buf, width, height);
 
-    match file.write_all(buf.as_bytes()) {
-        Ok(_) => println!("Succesfully wrote to {}", file_name),
-        Err(e) => panic!("couldn't write to {}: {}", file_name, e.description()),
-    }
+    ray::create_ray_demo(&mut buf, dimensions, linear_interpolate_y);
+
+    demo.save_as_ppm(buf);
 }

@@ -20,7 +20,7 @@ impl Ray {
     }
 }
 
-pub fn create_ray_demo<F>(buf: &mut String, dimensions: (u32, u32), op: F)
+pub fn create_ray_demo<F>(buf: &mut Vec<u8>, dimensions: (u32, u32), op: F)
 where
     F: Fn(Ray) -> Vec3,
 {
@@ -44,11 +44,10 @@ where
             let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
 
             let color = op(ray);
-            let ir = (255.99 * color[0]) as u32;
-            let ig = (255.99 * color[1]) as u32;
-            let ib = (255.99 * color[2]) as u32;
-            let output = format!("{} {} {}\n", ir, ig, ib);
-            buf.push_str(&output);
+            let ir = (255.99 * color[0]) as u8;
+            let ig = (255.99 * color[1]) as u8;
+            let ib = (255.99 * color[2]) as u8;
+            buf.extend([ir, ig, ib].iter());
         }
     }
 }

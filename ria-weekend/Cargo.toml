@@ -5,3 +5,4 @@ authors = ["ishanjain28 <ishanjain28@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+sdl2 = "*"

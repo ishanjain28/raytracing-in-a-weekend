@@ -19,35 +19,3 @@ impl Ray {
         return self.a + self.b * t;
     }
 }
-
-pub fn create_ray_demo<F>(buf: &mut Vec<u8>, dimensions: (u32, u32), op: F)
-where
-    F: Fn(Ray) -> Vec3,
-{
-    let (w, h) = dimensions;
-
-    // uses standard cg RHS notation
-    // y up, z pointing outwards and x to right
-    let lower_left_corner = Vec3::new(-1.0, -1.0, -1.0);
-    let horizontal = Vec3::new(2.0, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, 2.0, 0.0);
-    // observer
-    let origin = Vec3::new(0.0, 0.0, 0.0);
-
-    for j in (0..h).rev() {
-        for i in 0..w {
-            // relative offsets
-            // current position to total width/length
-            let u = i as f32 / w as f32;
-            let v = j as f32 / h as f32;
-
-            let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
-
-            let color = op(ray);
-            let ir = (255.99 * color[0]) as u8;
-            let ig = (255.99 * color[1]) as u8;
-            let ib = (255.99 * color[2]) as u8;
-            buf.extend([ir, ig, ib].iter());
-        }
-    }
-}

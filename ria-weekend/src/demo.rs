@@ -17,7 +17,7 @@ pub trait Demo {
             .expect("error in writing file header");
 
         for i in buf.chunks(4) {
-            match file.write(&format!("{} {} {}\n", i[0], i[1], i[2]).as_bytes()) {
+            match file.write(format!("{} {} {}\n", i[0], i[1], i[2]).as_bytes()) {
                 Ok(_) => (),
                 Err(e) => panic!("couldn't write to {}: {}", self.name(), e.description()),
             }

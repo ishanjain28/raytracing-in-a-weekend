@@ -1,13 +1,10 @@
 mod demo;
-mod linear_interpolation_y;
-mod ppm_example;
+mod demos;
 mod ray;
-mod simple_sphere;
 mod vec3;
 
 use demo::Demo;
-use linear_interpolation_y::LinearInterpolationY;
-use ppm_example::PpmExample;
+use demos::{LinearInterpolationY, PpmExample, SimpleSphere};
 use sdl2::{
     event::{Event, WindowEvent},
     keyboard::Keycode,
@@ -17,8 +14,6 @@ use sdl2::{
     video::Window,
     EventPump, Sdl,
 };
-use simple_sphere::SimpleSphere;
-use vec3::Vec3;
 
 fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
@@ -45,10 +40,12 @@ fn main() -> Result<(), String> {
 
     let texture_creator = canvas.texture_creator();
     let mut texture = texture_creator
-        .create_texture_static(PixelFormatEnum::RGB888, width as u32, height as u32)
+        .create_texture_static(PixelFormatEnum::BGR888, width as u32, height as u32)
         .map_err(|e| e.to_string())?;
 
     let mut active_demo: Box<Demo> = Box::new(LinearInterpolationY);
+
+    //println!("{:?} {:?} {:?}", texture.query(), texture.color_mod(), texture.alpha_mod());
 
     loop {
         for event in event_pump.poll_iter() {
@@ -61,27 +58,19 @@ fn main() -> Result<(), String> {
                 Event::KeyUp {
                     keycode: Some(Keycode::Num1),
                     ..
-                } => {
-                    active_demo = Box::new(PpmExample);
-                }
+                } => active_demo = Box::new(PpmExample),
                 Event::KeyUp {
                     keycode: Some(Keycode::Num2),
                     ..
-                } => {
-                    active_demo = Box::new(LinearInterpolationY);
-                }
+                } => active_demo = Box::new(LinearInterpolationY),
                 Event::KeyUp {
                     keycode: Some(Keycode::Num3),
                     ..
-                } => {
-                    active_demo = Box::new(SimpleSphere);
-                }
+                } => active_demo = Box::new(SimpleSphere),
                 Event::KeyUp {
                     keycode: Some(Keycode::S),
                     ..
-                } => {
-                    active_demo.save_as_ppm(&buffer, width, height);
-                }
+                } => active_demo.save_as_ppm(&buffer, width, height),
                 Event::Window {
                     win_event: WindowEvent::Resized(w, h),
                     ..
@@ -90,7 +79,7 @@ fn main() -> Result<(), String> {
                     height = h as usize;
                     buffer.resize(width * height * 4, 0);
                     texture = texture_creator
-                        .create_texture_static(PixelFormatEnum::RGB888, width as u32, height as u32)
+                        .create_texture_static(PixelFormatEnum::BGR888, width as u32, height as u32)
                         .expect("error in resizing texture");
                 }
                 _ => {}

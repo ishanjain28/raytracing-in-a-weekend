@@ -1,11 +1,10 @@
-use crate::ray::Ray;
-use crate::vec3::Vec3;
+use crate::{ray::Ray, vec3::Vec3};
 
-pub struct LinearInterpolationY;
+pub struct SimpleSphere;
 
-impl crate::Demo for LinearInterpolationY {
+impl crate::Demo for SimpleSphere {
     fn name(&self) -> String {
-        "linear_interpolation_y".to_owned()
+        "simple_sphere".to_owned()
     }
 
     fn render(&self, buf: &mut Vec<u8>, w: usize, h: usize) {
@@ -16,7 +15,7 @@ impl crate::Demo for LinearInterpolationY {
         let origin = Vec3::new(0.0, 0.0, 0.0);
 
         let mut offset = 0;
-        for j in (0..h) {
+        for j in 0..h {
             for i in 0..w {
                 // relative offsets
                 // current position to total width/length
@@ -32,17 +31,41 @@ impl crate::Demo for LinearInterpolationY {
                 buf[offset] = ir;
                 buf[offset + 1] = ig;
                 buf[offset + 2] = ib;
-                buf[offset + 3] = 0;
                 offset += 4;
             }
         }
     }
 }
 
-#[inline]
+fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> bool {
+    // dot(A + t*B - C, A + t*B - C) =  R*R
+    // when expanded we get
+    // t * t * dot(B, B) + 2 * t * dot(B, A-C) + dot(A-C, A-C) - R*R = 0
+
+    // A-C
+    let ac = ray.origin() - center;
+    let a = ray.direction().dot(&ray.direction());
+    let b = 2.0 * ac.dot(&ray.direction());
+    let c = ac.dot(&ac) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+
+    discriminant > 0.0
+}
+
 fn calc_color(ray: Ray) -> Vec3 {
+    // linear interpolation based on y coordinate
+    // top to down
+    // center at z=-1. xy axis cuts sphere in half
+    if ray_hit_sphere(Vec3::new(0.0, 0.0, 1.0), 0.5, &ray) {
+        // For all rays that hit sphere, return red color
+        // This will result in a sphere that is red in color
+        return Vec3::new(1.0, 0.0, 0.0);
+    }
     let unit_direction = ray.direction().unit_vector();
+    // For rays that don't hit sphere, It'll paint the gradient as the background
+    // Linear gradient depends on y
     let t = 0.5 * (unit_direction.y() + 1.0);
-    // (1.0 - t) * start blend_color + t * end color
+
+    // start color + end color
     Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
 }

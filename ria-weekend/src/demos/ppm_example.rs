@@ -8,7 +8,7 @@ impl crate::Demo for PpmExample {
 
     fn render(&self, buf: &mut Vec<u8>, w: usize, h: usize) {
         let mut offset = 0;
-        for j in (0..h) {
+        for j in 0..h {
             for i in 0..w {
                 let color = Vec3::new((i as f32) / (w as f32), (j as f32) / (h as f32), 0.2);
 
@@ -19,7 +19,6 @@ impl crate::Demo for PpmExample {
                 buf[offset] = ir;
                 buf[offset + 1] = ig;
                 buf[offset + 2] = ib;
-                buf[offset + 3] = 255;
 
                 offset += 4;
             }

@@ -6,43 +6,51 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+    #[inline]
     pub fn new(a: f32, b: f32, c: f32) -> Vec3 {
         Vec3 { inner: [a, b, c] }
     }
-
+    #[inline]
     pub fn x(&self) -> f32 {
         self[0]
     }
+    #[inline]
     pub fn y(&self) -> f32 {
         self[1]
     }
+    #[inline]
     pub fn z(&self) -> f32 {
         self[2]
     }
+    #[inline]
     pub fn r(&self) -> f32 {
         self[0]
     }
+    #[inline]
     pub fn g(&self) -> f32 {
         self[1]
     }
+    #[inline]
     pub fn b(&self) -> f32 {
         self[2]
     }
 
+    #[inline]
     pub fn length(&self) -> f32 {
         self.sq_len().sqrt()
     }
 
+    #[inline]
     pub fn sq_len(&self) -> f32 {
-        self[0] * self[0]
-            + self[1] * self[1]
-            + self[2] * self[2]
+        self[0] * self[0] + self[1] * self[1] + self[2] * self[2]
     }
 
+    #[inline]
     pub fn dot(&self, v: &Vec3) -> f32 {
         self[0] * v[0] + self[1] * v[1] + self[2] * v[2]
     }
 
+    #[inline]
     pub fn cross(&self, v: &Vec3) -> Vec3 {
         Vec3 {
             inner: [
@@ -52,7 +60,7 @@ impl Vec3 {
             ],
         }
     }
-
+    #[inline]
     pub fn unit_vector(&self) -> Vec3 {
         let length = self.length();
         Vec3 {
@@ -66,11 +74,7 @@ impl Add for Vec3 {
 
     fn add(self, o: Vec3) -> Vec3 {
         Vec3 {
-            inner: [
-                self[0] + o[0],
-                self[1] + o[1],
-                self[2] + o[2],
-            ],
+            inner: [self[0] + o[0], self[1] + o[1], self[2] + o[2]],
         }
     }
 }
@@ -80,11 +84,7 @@ impl Sub for Vec3 {
 
     fn sub(self, o: Vec3) -> Vec3 {
         Vec3 {
-            inner: [
-                self[0] - o[0],
-                self[1] - o[1],
-                self[2] - o[2],
-            ],
+            inner: [self[0] - o[0], self[1] - o[1], self[2] - o[2]],
         }
     }
 }
@@ -119,11 +119,7 @@ impl Div<Vec3> for Vec3 {
 
     fn div(self, o: Vec3) -> Vec3 {
         Vec3 {
-            inner: [
-                self[0] / o[0],
-                self[1] / o[1],
-                self[2] / o[2],
-            ],
+            inner: [self[0] / o[0], self[1] / o[1], self[2] / o[2]],
         }
     }
 }

@@ -9,9 +9,13 @@ impl crate::Demo for LinearInterpolationY {
     }
 
     fn render(&self, buf: &mut Vec<u8>, w: usize, h: usize) {
-        let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
-        let horizontal = Vec3::new(4.0, 0.0, 0.0);
-        let vertical = Vec3::new(0.0, 2.0, 0.0);
+        // in my case, The resolution is 1200x800
+        // These numbers are calculated by first calculating the aspect ratio
+        // and then just figuring out lower left corner, Width(2 x aspect ratio width)
+        // Height(2 x aspect ratio height)
+        let lower_left_corner = Vec3::new(-3.0, -2.0, -1.0);
+        let horizontal = Vec3::new(6.0, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, 4.0, 0.0);
         // Observer position
         let origin = Vec3::new(0.0, 0.0, 0.0);
 
@@ -25,9 +29,9 @@ impl crate::Demo for LinearInterpolationY {
 
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
                 let color = calc_color(ray);
-                let ir = (255.99 * color[0]) as u8;
-                let ig = (255.99 * color[1]) as u8;
-                let ib = (255.99 * color[2]) as u8;
+                let ir = (255.99 * color.r()) as u8;
+                let ig = (255.99 * color.g()) as u8;
+                let ib = (255.99 * color.b()) as u8;
 
                 buf[offset] = ir;
                 buf[offset + 1] = ig;

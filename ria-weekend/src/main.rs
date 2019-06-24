@@ -4,7 +4,7 @@ mod ray;
 mod vec3;
 
 use demo::Demo;
-use demos::{LinearInterpolationY, PpmExample, SimpleSphere};
+use demos::{LinearInterpolationY, PpmExample, SimpleSphere, SurfaceNormalSphere};
 use sdl2::{
     event::{Event, WindowEvent},
     keyboard::Keycode,
@@ -19,7 +19,7 @@ fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
     let video_subsys = sdl_ctx.video()?;
 
-    let (mut width, mut height): (usize, usize) = (500, 500);
+    let (mut width, mut height): (usize, usize) = (1200, 800);
 
     let mut window = video_subsys
         .window("Ray tracing in a weekend", width as u32, height as u32)
@@ -35,7 +35,7 @@ fn main() -> Result<(), String> {
         .build()
         .map_err(|e| e.to_string())?;
 
-    // Buffer to store a RGBA framebuffer
+    // RGBA framebuffer
     let mut buffer = vec![0; height * width * 4];
 
     let texture_creator = canvas.texture_creator();
@@ -43,10 +43,10 @@ fn main() -> Result<(), String> {
         .create_texture_static(PixelFormatEnum::BGR888, width as u32, height as u32)
         .map_err(|e| e.to_string())?;
 
-    let mut active_demo: Box<Demo> = Box::new(LinearInterpolationY);
+    let mut active_demo: Box<dyn Demo> = Box::new(PpmExample);
 
     //println!("{:?} {:?} {:?}", texture.query(), texture.color_mod(), texture.alpha_mod());
-
+    let mut should_update = true;
     loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -58,15 +58,31 @@ fn main() -> Result<(), String> {
                 Event::KeyUp {
                     keycode: Some(Keycode::Num1),
                     ..
-                } => active_demo = Box::new(PpmExample),
+                } => {
+                    should_update = true;
+                    active_demo = Box::new(PpmExample);
+                }
                 Event::KeyUp {
                     keycode: Some(Keycode::Num2),
                     ..
-                } => active_demo = Box::new(LinearInterpolationY),
+                } => {
+                    should_update = true;
+                    active_demo = Box::new(LinearInterpolationY);
+                }
                 Event::KeyUp {
                     keycode: Some(Keycode::Num3),
                     ..
-                } => active_demo = Box::new(SimpleSphere),
+                } => {
+                    should_update = true;
+                    active_demo = Box::new(SimpleSphere);
+                }
+                Event::KeyUp {
+                    keycode: Some(Keycode::Num4),
+                    ..
+                } => {
+                    should_update = true;
+                    active_demo = Box::new(SurfaceNormalSphere);
+                }
                 Event::KeyUp {
                     keycode: Some(Keycode::S),
                     ..
@@ -81,14 +97,17 @@ fn main() -> Result<(), String> {
                     texture = texture_creator
                         .create_texture_static(PixelFormatEnum::BGR888, width as u32, height as u32)
                         .expect("error in resizing texture");
+                    should_update = true;
                 }
                 _ => {}
             };
         }
-
-        active_demo.render(&mut buffer, width, height);
-        texture.update(None, &buffer, width * 4);
-        canvas.copy(&texture, None, None);
-        canvas.present();
+        if should_update {
+            active_demo.render(&mut buffer, width, height);
+            texture.update(None, &buffer, width * 4);
+            canvas.copy(&texture, None, None);
+            canvas.present();
+            should_update = false;
+        }
     }
 }

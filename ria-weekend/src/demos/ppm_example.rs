@@ -12,9 +12,9 @@ impl crate::Demo for PpmExample {
             for i in 0..w {
                 let color = Vec3::new((i as f32) / (w as f32), (j as f32) / (h as f32), 0.2);
 
-                let ir = (255.99 * color[0]) as u8;
-                let ig = (255.99 * color[1]) as u8;
-                let ib = (255.99 * color[2]) as u8;
+                let ir = (255.99 * color.r()) as u8;
+                let ig = (255.99 * color.g()) as u8;
+                let ib = (255.99 * color.b()) as u8;
 
                 buf[offset] = ir;
                 buf[offset + 1] = ig;

@@ -17,7 +17,6 @@ impl Sphere {
 
 impl Hitable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, hit_rec: &mut HitRecord) -> bool {
-        println!("t_max: {}", t_max);
         let oc = ray.origin() - self.center;
         let a = ray.direction().dot(&ray.direction());
         let b = oc.dot(&ray.direction());

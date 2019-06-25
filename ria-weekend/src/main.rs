@@ -1,27 +1,27 @@
 mod demo;
 mod demos;
+mod hitable;
 mod ray;
+mod shapes;
 mod vec3;
 
 use demo::Demo;
-use demos::{LinearInterpolationY, PpmExample, SimpleSphere, SurfaceNormalSphere};
+use demos::{
+    HitableSurfaceNormalSphere, LinearInterpolationY, PpmExample, SimpleSphere, SurfaceNormalSphere,
+};
 use sdl2::{
     event::{Event, WindowEvent},
     keyboard::Keycode,
     pixels::PixelFormatEnum,
-    rect::Rect,
-    render::{Canvas, Texture, TextureValueError},
-    video::Window,
-    EventPump, Sdl,
 };
 
 fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
     let video_subsys = sdl_ctx.video()?;
 
-    let (mut width, mut height): (usize, usize) = (1200, 800);
+    let (mut width, mut height): (usize, usize) = (1200, 600);
 
-    let mut window = video_subsys
+    let window = video_subsys
         .window("Ray tracing in a weekend", width as u32, height as u32)
         .position_centered()
         .build()
@@ -46,6 +46,11 @@ fn main() -> Result<(), String> {
     let mut active_demo: Box<dyn Demo> = Box::new(PpmExample);
 
     //println!("{:?} {:?} {:?}", texture.query(), texture.color_mod(), texture.alpha_mod());
+
+    // TODO: Should update when window is unfocus since the project window retains
+    // data from overlapped window
+    // TODO: Maybe consider using condition variable to make loop {} not run at full
+    // speed at all times pinning a core at 100%
     let mut should_update = true;
     loop {
         for event in event_pump.poll_iter() {
@@ -82,6 +87,13 @@ fn main() -> Result<(), String> {
                 } => {
                     should_update = true;
                     active_demo = Box::new(SurfaceNormalSphere);
+                }
+                Event::KeyUp {
+                    keycode: Some(Keycode::Num5),
+                    ..
+                } => {
+                    should_update = true;
+                    active_demo = Box::new(HitableSurfaceNormalSphere);
                 }
                 Event::KeyUp {
                     keycode: Some(Keycode::S),

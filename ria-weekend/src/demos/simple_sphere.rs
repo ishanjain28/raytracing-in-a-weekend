@@ -1,6 +1,6 @@
 use crate::{ray::Ray, vec3::Vec3};
 
-const RADIUS: f32 = 0.8;
+const RADIUS: f32 = 0.5;
 
 pub struct SimpleSphere;
 
@@ -14,14 +14,14 @@ impl crate::Demo for SimpleSphere {
         // These numbers are calculated by first calculating the aspect ratio
         // and then just figuring out lower left corner, Width(2 x aspect ratio width)
         // Height(2 x aspect ratio height)
-        let lower_left_corner = Vec3::new(-3.0, -2.0, -1.0);
-        let horizontal = Vec3::new(6.0, 0.0, 0.0);
-        let vertical = Vec3::new(0.0, 4.0, 0.0);
+        let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
+        let horizontal = Vec3::new(4.0, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, 2.0, 0.0);
         // Observer position
         let origin = Vec3::new(0.0, 0.0, 0.0);
 
         let mut offset = 0;
-        for j in 0..h {
+        for j in (0..h).rev() {
             for i in 0..w {
                 // relative offsets
                 // current position to total width/length

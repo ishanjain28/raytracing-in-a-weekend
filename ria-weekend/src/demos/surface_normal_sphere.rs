@@ -1,6 +1,6 @@
-use crate::{demo::Demo, ray, ray::Ray, vec3::Vec3};
+use crate::{ray::Ray, vec3::Vec3};
 
-const RADIUS: f32 = 0.8;
+const RADIUS: f32 = 0.5;
 pub struct SurfaceNormalSphere;
 
 impl crate::Demo for SurfaceNormalSphere {
@@ -13,14 +13,14 @@ impl crate::Demo for SurfaceNormalSphere {
         // These numbers are calculated by first calculating the aspect ratio
         // and then just figuring out lower left corner, Width(2 x aspect ratio width)
         // Height(2 x aspect ratio height)
-        let lower_left_corner = Vec3::new(-3.0, -2.0, -1.0);
-        let horizontal = Vec3::new(6.0, 0.0, 0.0);
-        let vertical = Vec3::new(0.0, 4.0, 0.0);
+        let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
+        let horizontal = Vec3::new(4.0, 0.0, 0.0);
+        let vertical = Vec3::new(0.0, 2.0, 0.0);
         // Observer position
         let origin = Vec3::new(0.0, 0.0, 0.0);
 
         let mut offset = 0;
-        for j in 0..h {
+        for j in (0..h).rev() {
             for i in 0..w {
                 let u = i as f32 / w as f32;
                 let v = j as f32 / h as f32;
@@ -64,14 +64,13 @@ fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> f32 {
     // when expanded we get
     // t * t * dot(B, B) + 2 * t * dot(B, A-C) + dot(A-C, A-C) - R*R = 0
 
-    let oc = ray.origin() - center;
+    let pc = ray.origin() - center;
     let a = ray.direction().dot(&ray.direction());
-    let b = 2.0 * oc.dot(&ray.direction());
-    let c = oc.dot(&oc) - radius * radius;
+    let b = 2.0 * pc.dot(&ray.direction());
+    let c = pc.dot(&pc) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
 
     if discriminant >= 0.0 {
-        // return quadratic root
         (-b - discriminant.sqrt()) / (2.0 * a)
     } else {
         -1.0

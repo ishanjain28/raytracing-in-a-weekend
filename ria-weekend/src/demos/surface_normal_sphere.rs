@@ -1,4 +1,4 @@
-use crate::{ray::Ray, vec3::Vec3};
+use crate::types::{Ray, Vec3};
 
 const RADIUS: f32 = 0.5;
 pub struct SurfaceNormalSphere;
@@ -8,7 +8,7 @@ impl crate::Demo for SurfaceNormalSphere {
         "surface_normal_sphere".to_owned()
     }
 
-    fn render(&self, buf: &mut Vec<u8>, w: usize, h: usize) {
+    fn render(&self, buf: &mut Vec<u8>, w: usize, h: usize, _ns: u8) {
         // in my case, The resolution is 1200x800
         // These numbers are calculated by first calculating the aspect ratio
         // and then just figuring out lower left corner, Width(2 x aspect ratio width)

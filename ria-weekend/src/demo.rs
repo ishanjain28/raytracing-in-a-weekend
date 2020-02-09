@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Write;
 
 pub trait Demo {
-    fn render(&self, buf: &mut Vec<u8>, width: usize, height: usize);
+    fn render(&self, buf: &mut Vec<u8>, width: usize, height: usize, samples: u8);
     fn name(&self) -> String;
 
     fn save_as_ppm(&self, buf: &[u8], width: usize, height: usize) {

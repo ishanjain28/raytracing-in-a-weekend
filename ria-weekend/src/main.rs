@@ -1,19 +1,21 @@
+#![feature(impl_trait_in_bindings)]
+
+mod camera;
 mod demo;
 mod demos;
 mod hitable;
-mod ray;
+mod render;
 mod shapes;
-mod vec3;
+mod types;
 
 use demo::Demo;
-use demos::{
-    HitableSurfaceNormalSphere, LinearInterpolationY, PpmExample, SimpleSphere, SurfaceNormalSphere,
-};
 use sdl2::{
     event::{Event, WindowEvent},
     keyboard::Keycode,
     pixels::PixelFormatEnum,
 };
+
+const NUM_SAMPLES: u8 = 10;
 
 fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
@@ -43,10 +45,9 @@ fn main() -> Result<(), String> {
         .create_texture_static(PixelFormatEnum::BGR888, width as u32, height as u32)
         .map_err(|e| e.to_string())?;
 
-    let mut active_demo: Box<dyn Demo> = Box::new(PpmExample);
-
     //println!("{:?} {:?} {:?}", texture.query(), texture.color_mod(), texture.alpha_mod());
 
+    let active_demo: impl Demo = demos::SurfaceNormalSphere;
     // TODO: Should update when window is unfocus since the project window retains
     // data from overlapped window
     // TODO: Maybe consider using condition variable to make loop {} not run at full
@@ -60,41 +61,6 @@ fn main() -> Result<(), String> {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => return Ok(()),
-                Event::KeyUp {
-                    keycode: Some(Keycode::Num1),
-                    ..
-                } => {
-                    should_update = true;
-                    active_demo = Box::new(PpmExample);
-                }
-                Event::KeyUp {
-                    keycode: Some(Keycode::Num2),
-                    ..
-                } => {
-                    should_update = true;
-                    active_demo = Box::new(LinearInterpolationY);
-                }
-                Event::KeyUp {
-                    keycode: Some(Keycode::Num3),
-                    ..
-                } => {
-                    should_update = true;
-                    active_demo = Box::new(SimpleSphere);
-                }
-                Event::KeyUp {
-                    keycode: Some(Keycode::Num4),
-                    ..
-                } => {
-                    should_update = true;
-                    active_demo = Box::new(SurfaceNormalSphere);
-                }
-                Event::KeyUp {
-                    keycode: Some(Keycode::Num5),
-                    ..
-                } => {
-                    should_update = true;
-                    active_demo = Box::new(HitableSurfaceNormalSphere);
-                }
                 Event::KeyUp {
                     keycode: Some(Keycode::S),
                     ..
@@ -115,7 +81,7 @@ fn main() -> Result<(), String> {
             };
         }
         if should_update {
-            active_demo.render(&mut buffer, width, height);
+            active_demo.render(&mut buffer, width, height, NUM_SAMPLES);
             texture.update(None, &buffer, width * 4);
             canvas.copy(&texture, None, None);
             canvas.present();

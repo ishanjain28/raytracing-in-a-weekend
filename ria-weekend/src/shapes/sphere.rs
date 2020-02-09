@@ -1,7 +1,6 @@
 use crate::{
     hitable::{HitRecord, Hitable},
-    ray::Ray,
-    vec3::Vec3,
+    types::{Ray, Vec3},
 };
 
 pub struct Sphere {

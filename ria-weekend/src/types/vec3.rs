@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Index, IndexMut, Mul, MulAssign, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
@@ -79,6 +79,14 @@ impl Add for Vec3 {
     }
 }
 
+impl AddAssign for Vec3 {
+    fn add_assign(&mut self, o: Vec3) {
+        self.inner[0] += o.inner[0];
+        self.inner[1] += o.inner[1];
+        self.inner[2] += o.inner[2];
+    }
+}
+
 impl Sub for Vec3 {
     type Output = Vec3;
 
@@ -132,6 +140,15 @@ impl Div<f32> for Vec3 {
         Vec3 {
             inner: [self[0] * o, self[1] * o, self[2] * o],
         }
+    }
+}
+
+impl DivAssign<f32> for Vec3 {
+    fn div_assign(&mut self, o: f32) {
+        let o = 1.0 / o;
+        self.inner[0] /= o;
+        self.inner[1] /= o;
+        self.inner[2] /= o;
     }
 }
 

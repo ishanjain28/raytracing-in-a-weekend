@@ -4,15 +4,21 @@ const RADIUS: f32 = 0.5;
 pub struct SurfaceNormalSphere;
 
 impl crate::Demo for SurfaceNormalSphere {
-    fn name(&self) -> String {
-        "surface_normal_sphere".to_owned()
+    fn name(&self) -> &'static str {
+        "surface_normal_sphere"
     }
 
-    fn render(&self, buf: &mut Vec<u8>, w: usize, h: usize, _ns: u8) {
-        // in my case, The resolution is 1200x800
-        // These numbers are calculated by first calculating the aspect ratio
-        // and then just figuring out lower left corner, Width(2 x aspect ratio width)
-        // Height(2 x aspect ratio height)
+    fn render(&self, buf: &mut [u8], w: usize, h: usize, _ns: u8) {
+        // Usually, lower_left_corner should've been -1.0,-1.0,-1.0 and
+        // horizontal should've been 2.0,0.0,0.0
+        // but we are working with a canvas that is 2:1 in size.
+        // So, If we had used aforementioned values then, We would've gotten
+        // a ellipse instead of a circle
+        // Since, we are using the same number of coordinates/values to
+        // represent twice as many points in x axis, The generated image is also
+        // stretched horizontally.
+        // To prevent this from happening, Since our dimensions are in 2:1 ratio,
+        // We adjust the lower_left_corner and horizontal values to scale
         let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
         let horizontal = Vec3::new(4.0, 0.0, 0.0);
         let vertical = Vec3::new(0.0, 2.0, 0.0);
@@ -41,29 +47,21 @@ impl crate::Demo for SurfaceNormalSphere {
 }
 
 fn calculate_color(ray: Ray) -> Vec3 {
-    // center at z=-1. xy axis cuts sphere in half
-    // blending parameter
     let t = ray_hit_sphere(Vec3::new(0.0, 0.0, -1.0), RADIUS, &ray);
     if t > 0.0 {
-        // For all rays that hit sphere, return red color
-        // This will result in a sphere that is red in color
         let n = (ray.point_at_parameter(t) - Vec3::new(0.0, 0.0, -1.0)).unit_vector();
         return Vec3::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0) * 0.5;
     }
     let unit_direction = ray.direction().unit_vector();
     // For rays that don't hit sphere, It'll paint the gradient as the background
     // Linear gradient depends on y
-    let t = 0.5 * (unit_direction.y() + 1.0);
+    let t = 0.5 * unit_direction.y() + 1.0;
 
     // start color + end color
     Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
 }
 
 fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> f32 {
-    // dot(A + t*B - C, A + t*B - C) =  R*R
-    // when expanded we get
-    // t * t * dot(B, B) + 2 * t * dot(B, A-C) + dot(A-C, A-C) - R*R = 0
-
     let pc = ray.origin() - center;
     let a = ray.direction().dot(&ray.direction());
     let b = 2.0 * pc.dot(&ray.direction());

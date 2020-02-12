@@ -1,23 +1,33 @@
-use crate::types::{Ray, Vec3};
+use crate::{
+    types::{Ray, Vec3},
+    Demo,
+};
 
 const RADIUS: f32 = 0.5;
 
 pub struct SimpleSphere;
 
-impl crate::Demo for SimpleSphere {
-    fn name(&self) -> String {
-        "simple_sphere".to_owned()
+impl Demo for SimpleSphere {
+    fn name(&self) -> &'static str {
+        "simple_sphere"
     }
 
-    fn render(&self, buf: &mut Vec<u8>, w: usize, h: usize, _ns: u8) {
-        // in my case, The resolution is 1200x800
-        // These numbers are calculated by first calculating the aspect ratio
-        // and then just figuring out lower left corner, Width(2 x aspect ratio width)
-        // Height(2 x aspect ratio height)
+    fn render(&self, buf: &mut [u8], w: usize, h: usize, _ns: u8) {
+        // Usually, lower_left_corner should've been -1.0,-1.0,-1.0 and
+        // horizontal should've been 2.0,0.0,0.0
+        // but we are working with a canvas that is 2:1 in size.
+        // So, If we had used aforementioned values then, We would've gotten
+        // a ellipse instead of a circle
+        // Since, we are using the same number of coordinates/values to
+        // represent twice as many points in x axis, The generated image is also
+        // stretched horizontally.
+        // To prevent this from happening, Since our dimensions are in 2:1 ratio,
+        // We adjust the lower_left_corner and horizontal values to scale
+
         let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
         let horizontal = Vec3::new(4.0, 0.0, 0.0);
         let vertical = Vec3::new(0.0, 2.0, 0.0);
-        // Observer position
+        // Observer's position
         let origin = Vec3::new(0.0, 0.0, 0.0);
 
         let mut offset = 0;
@@ -30,13 +40,9 @@ impl crate::Demo for SimpleSphere {
 
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
                 let color = calc_color(ray);
-                let ir = (255.99 * color.r()) as u8;
-                let ig = (255.99 * color.g()) as u8;
-                let ib = (255.99 * color.b()) as u8;
-
-                buf[offset] = ir;
-                buf[offset + 1] = ig;
-                buf[offset + 2] = ib;
+                buf[offset] = (255.99 * color.r()) as u8;
+                buf[offset + 1] = (255.99 * color.g()) as u8;
+                buf[offset + 2] = (255.99 * color.b()) as u8;
                 offset += 4;
             }
         }
@@ -46,18 +52,22 @@ impl crate::Demo for SimpleSphere {
 fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> bool {
     // For a point to lie on a circle,
     // (x-cx)^2 + (y-cy)^2 + (z-cz)^2 = R * R
-    // should hold true
-    // Aforementioned equation can be rewritten as,
-    // dot(p-c, p-c) since the dot product of dis-similar axises will be zero
+    // should hold true. This equation can be rewritten as,
+    // dot(p(t)-C, p(t)-C)
+    // where p(t) => A + B * t. p(t) represents a point on ray
+    // Putting p(t) back in equation
+    // dot((A + t*B - C), (A + t*B - C)) = R * R
+    // This can be written as,
+    // dot((t*B + (A-C)), (t*B + (A-C)) => (t*B + (A-C))^2
     // the expansion of this dot product will result in the same equation
-    // i.e. t * t * dot(B,B) + 2 * t * dot(B, A-C) + dot(A-C, A-C)
+    // i.e. t * t * dot(B,B) + 2 * t * dot(B, A-C) + dot(A-C, A-C) - R * R
 
     // Vector from circle center to point
-    let pc = ray.origin() - center;
+    let ac = ray.origin() - center;
 
     let a = ray.direction().dot(&ray.direction());
-    let b = 2.0 * pc.dot(&ray.direction());
-    let c = pc.dot(&pc) - radius * radius;
+    let b = 2.0 * ray.direction().dot(&ac);
+    let c = ac.dot(&ac) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
 
     discriminant > 0.0
@@ -66,7 +76,9 @@ fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> bool {
 fn calc_color(ray: Ray) -> Vec3 {
     // linear interpolation based on y coordinate
     // top to down
-    // center at z=-1. xy axis cuts sphere in 4 parts
+    // z == -1 because the observer is at 0.0,0.0,0.0 and the circle is being
+    // drawn in the z = -1 plane. So, The intersection will happen in this plane
+    // since circle is 2D
     if ray_hit_sphere(Vec3::new(0.0, 0.0, -1.0), RADIUS, &ray) {
         // For all rays that hit sphere, return red color
         // This will result in a sphere that is red in color
@@ -75,7 +87,7 @@ fn calc_color(ray: Ray) -> Vec3 {
     let unit_direction = ray.direction().unit_vector();
     // For rays that don't hit sphere, It'll paint the gradient as the background
     // Linear gradient depends on y
-    let t = 0.5 * (unit_direction.y() + 1.0);
+    let t = 0.5 * unit_direction.y() + 1.0;
 
     // start color + end color
     Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t

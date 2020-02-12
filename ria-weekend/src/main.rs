@@ -1,18 +1,13 @@
-#![feature(impl_trait_in_bindings)]
-
-mod camera;
-mod demo;
 mod demos;
-mod hitable;
-mod render;
-mod shapes;
 mod types;
 
-use demo::Demo;
-use sdl2::{
-    event::{Event, WindowEvent},
-    keyboard::Keycode,
-    pixels::PixelFormatEnum,
+use {
+    demos::Demo,
+    sdl2::{
+        event::{Event, WindowEvent},
+        keyboard::Keycode,
+        pixels::PixelFormatEnum,
+    },
 };
 
 const NUM_SAMPLES: u8 = 10;
@@ -21,7 +16,7 @@ fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
     let video_subsys = sdl_ctx.video()?;
 
-    let (mut width, mut height): (usize, usize) = (1200, 600);
+    let (mut width, mut height) = (1280usize, 640usize);
 
     let window = video_subsys
         .window("Ray tracing in a weekend", width as u32, height as u32)
@@ -47,7 +42,7 @@ fn main() -> Result<(), String> {
 
     //println!("{:?} {:?} {:?}", texture.query(), texture.color_mod(), texture.alpha_mod());
 
-    let active_demo: impl Demo = demos::SurfaceNormalSphere;
+    let mut active_demo: Box<dyn Demo> = Box::new(demos::SimpleRectangle);
     // TODO: Should update when window is unfocus since the project window retains
     // data from overlapped window
     // TODO: Maybe consider using condition variable to make loop {} not run at full
@@ -61,10 +56,20 @@ fn main() -> Result<(), String> {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => return Ok(()),
-                Event::KeyUp {
-                    keycode: Some(Keycode::S),
-                    ..
-                } => active_demo.save_as_ppm(&buffer, width, height),
+                Event::KeyUp { keycode, .. } => {
+                    match keycode {
+                        Some(Keycode::S) => active_demo.save_as_ppm(&buffer, width, height),
+                        Some(Keycode::Num1) => active_demo = Box::new(demos::SimpleRectangle),
+                        Some(Keycode::Num2) => {
+                            active_demo = Box::new(demos::LinearGradientRectangle)
+                        }
+                        Some(Keycode::Num3) => active_demo = Box::new(demos::SimpleSphere),
+                        Some(Keycode::Num4) => active_demo = Box::new(demos::SurfaceNormalSphere),
+                        None => unreachable!(),
+                        _ => (),
+                    };
+                    should_update = true;
+                }
                 Event::Window {
                     win_event: WindowEvent::Resized(w, h),
                     ..

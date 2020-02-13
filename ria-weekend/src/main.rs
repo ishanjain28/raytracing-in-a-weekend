@@ -1,5 +1,10 @@
+#![allow(clippy::suspicious_arithmetic_impl)]
+
+mod camera;
 mod demos;
 mod types;
+
+pub use camera::Camera;
 
 use {
     demos::Demo,
@@ -10,13 +15,13 @@ use {
     },
 };
 
-const NUM_SAMPLES: u8 = 10;
+const NUM_SAMPLES: u8 = 100;
 
 fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
     let video_subsys = sdl_ctx.video()?;
 
-    let (mut width, mut height) = (1280usize, 640usize);
+    let (mut width, mut height) = (1280, 640);
 
     let window = video_subsys
         .window("Ray tracing in a weekend", width as u32, height as u32)
@@ -65,6 +70,8 @@ fn main() -> Result<(), String> {
                         }
                         Some(Keycode::Num3) => active_demo = Box::new(demos::SimpleSphere),
                         Some(Keycode::Num4) => active_demo = Box::new(demos::SurfaceNormalSphere),
+                        Some(Keycode::Num5) => active_demo = Box::new(demos::HitableSphere),
+                        Some(Keycode::Num6) => active_demo = Box::new(demos::SimpleAntialiasing),
                         None => unreachable!(),
                         _ => (),
                     };

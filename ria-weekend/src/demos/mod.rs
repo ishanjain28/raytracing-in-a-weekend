@@ -1,9 +1,13 @@
+mod hitable_sphere;
 mod linear_gradient_rectangle;
+mod simple_antialiasing;
 mod simple_rectangle;
 mod simple_sphere;
 mod surface_normal_sphere;
 
+pub use hitable_sphere::HitableSphere;
 pub use linear_gradient_rectangle::LinearGradientRectangle;
+pub use simple_antialiasing::SimpleAntialiasing;
 pub use simple_rectangle::SimpleRectangle;
 pub use simple_sphere::SimpleSphere;
 pub use surface_normal_sphere::SurfaceNormalSphere;
@@ -21,11 +25,11 @@ pub trait Demo {
             Ok(file) => file,
             Err(e) => panic!("couldn't create {}: {}", self.name(), e),
         };
-        file.write(header.as_bytes())
+        file.write_all(header.as_bytes())
             .expect("error in writing file header");
 
         for i in buf.chunks(4) {
-            match file.write(format!("{} {} {}\n", i[0], i[1], i[2]).as_bytes()) {
+            match file.write_all(format!("{} {} {}\n", i[0], i[1], i[2]).as_bytes()) {
                 Ok(_) => (),
                 Err(e) => panic!("couldn't write to {}: {}", self.name(), e),
             }

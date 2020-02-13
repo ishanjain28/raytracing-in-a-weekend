@@ -130,6 +130,13 @@ impl Mul<f64> for Vec3 {
     }
 }
 
+impl Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+    fn mul(self, o: Vec3) -> Vec3 {
+        Vec3([self[0] * o[0], self[1] * o[1], self[2] * o[2]])
+    }
+}
+
 impl Div<Vec3> for Vec3 {
     type Output = Vec3;
 

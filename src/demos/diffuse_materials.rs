@@ -39,9 +39,15 @@ impl Demo for DiffuseMaterials {
                 }
 
                 color /= samples as f64;
-                buf[offset] = (255.99 * color.r()) as u8;
-                buf[offset + 1] = (255.99 * color.g()) as u8;
-                buf[offset + 2] = (255.99 * color.b()) as u8;
+                // Without taking square root of each color, we get a picture that
+                // is quite dark
+                // Spheres in this case are absorbing 50% of the light casted on them
+                // So, IRL, It *should* look a bit lighter in color
+                // To do that, We apply gamma correction by a factor of 2
+                // which means multiple rgb values by 1/gamma aka 1/2
+                buf[offset] = (255.99 * color.r().sqrt()) as u8;
+                buf[offset + 1] = (255.99 * color.g().sqrt()) as u8;
+                buf[offset + 2] = (255.99 * color.b().sqrt()) as u8;
                 offset += 4;
             }
         }
@@ -49,8 +55,12 @@ impl Demo for DiffuseMaterials {
 }
 
 fn calc_color(ray: Ray, world: &HitableList, rng: &mut rand::rngs::ThreadRng) -> Vec3 {
-    if let Some(hit_rec) = world.hit(&ray, 0.0, std::f64::MAX) {
-        let target = hit_rec.p + hit_rec.normal + random_point_in_unit_sphere(rng);
+    // The value of t_min here could've been 0.0 but since f32/f64 can only be
+    // partially compared, It may cause shadow acne effect.
+    // To combat this problem, We set a bias
+    // More information here, https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/#shadow-acne
+    if let Some(hit_rec) = world.hit(&ray, 0.001, std::f64::MAX) {
+        let target = hit_rec.p + hit_rec.normal + random_point_in_unit_space(rng);
         calc_color(Ray::new(hit_rec.p, target - hit_rec.p), &world, rng) * 0.5
     } else {
         let unit_direction = ray.direction().unit_vector();
@@ -59,7 +69,7 @@ fn calc_color(ray: Ray, world: &HitableList, rng: &mut rand::rngs::ThreadRng) ->
     }
 }
 
-fn random_point_in_unit_sphere(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
+fn random_point_in_unit_space(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
     let mut point = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>()) * 2.0
         - Vec3::new(1.0, 1.0, 1.0);
     while point.sq_len() >= 1.0 {

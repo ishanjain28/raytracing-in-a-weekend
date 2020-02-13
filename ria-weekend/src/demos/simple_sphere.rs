@@ -3,7 +3,7 @@ use crate::{
     Demo,
 };
 
-const RADIUS: f32 = 0.5;
+const RADIUS: f64 = 0.5;
 
 pub struct SimpleSphere;
 
@@ -35,8 +35,8 @@ impl Demo for SimpleSphere {
             for i in 0..w {
                 // relative offsets
                 // current position to total width/length
-                let u = i as f32 / w as f32;
-                let v = j as f32 / h as f32;
+                let u = i as f64 / w as f64;
+                let v = j as f64 / h as f64;
 
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
                 let color = calc_color(ray);
@@ -49,7 +49,7 @@ impl Demo for SimpleSphere {
     }
 }
 
-fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> bool {
+fn ray_hit_sphere(center: Vec3, radius: f64, ray: &Ray) -> bool {
     // For a point to lie on a circle,
     // (x-cx)^2 + (y-cy)^2 + (z-cz)^2 = R * R
     // should hold true. This equation can be rewritten as,

@@ -25,8 +25,8 @@ impl Demo for HitableSphere {
         let mut offset = 0;
         for j in (0..height).rev() {
             for i in 0..width {
-                let u = i as f32 / width as f32;
-                let v = j as f32 / height as f32;
+                let u = i as f64 / width as f64;
+                let v = j as f64 / height as f64;
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
 
                 let color = calc_color(ray, &world);
@@ -40,7 +40,7 @@ impl Demo for HitableSphere {
 }
 
 fn calc_color(ray: Ray, world: &HitableList) -> Vec3 {
-    if let Some(hit_rec) = world.hit(&ray, 0.0, std::f32::MAX) {
+    if let Some(hit_rec) = world.hit(&ray, 0.0, std::f64::MAX) {
         // It's easier to visualise normals as unit vectors
         // So, This trick of adding 1 to each dimension and then halving
         // the resulting value shifts the normals from -1<->1 range to

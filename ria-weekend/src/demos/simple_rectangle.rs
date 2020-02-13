@@ -11,7 +11,7 @@ impl Demo for SimpleRectangle {
         let mut offset = 0;
         for j in (0..height).rev() {
             for i in 0..width {
-                let color = Vec3::new(i as f32 / width as f32, j as f32 / width as f32, 0.2);
+                let color = Vec3::new(i as f64 / width as f64, j as f64 / width as f64, 0.2);
 
                 buf[offset] = (255.99 * color.r()) as u8;
                 buf[offset + 1] = (255.99 * color.g()) as u8;

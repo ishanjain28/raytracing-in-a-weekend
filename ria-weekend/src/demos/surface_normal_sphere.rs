@@ -1,6 +1,6 @@
 use crate::types::{Ray, Vec3};
 
-const RADIUS: f32 = 0.5;
+const RADIUS: f64 = 0.5;
 pub struct SurfaceNormalSphere;
 
 impl crate::Demo for SurfaceNormalSphere {
@@ -28,8 +28,8 @@ impl crate::Demo for SurfaceNormalSphere {
         let mut offset = 0;
         for j in (0..h).rev() {
             for i in 0..w {
-                let u = i as f32 / w as f32;
-                let v = j as f32 / h as f32;
+                let u = i as f64 / w as f64;
+                let v = j as f64 / h as f64;
 
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
                 let color = calculate_color(ray);
@@ -61,7 +61,7 @@ fn calculate_color(ray: Ray) -> Vec3 {
     Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
 }
 
-fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> f32 {
+fn ray_hit_sphere(center: Vec3, radius: f64, ray: &Ray) -> f64 {
     let pc = ray.origin() - center;
     let a = ray.direction().dot(&ray.direction());
     let b = 2.0 * pc.dot(&ray.direction());

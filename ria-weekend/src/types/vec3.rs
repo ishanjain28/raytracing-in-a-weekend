@@ -4,50 +4,50 @@ use std::{
 };
 
 #[derive(Copy, Clone)]
-pub struct Vec3([f32; 3]);
+pub struct Vec3([f64; 3]);
 
 impl Vec3 {
     #[inline]
-    pub const fn new(a: f32, b: f32, c: f32) -> Vec3 {
+    pub const fn new(a: f64, b: f64, c: f64) -> Vec3 {
         Vec3([a, b, c])
     }
     #[inline]
-    pub fn x(&self) -> f32 {
+    pub fn x(&self) -> f64 {
         self[0]
     }
     #[inline]
-    pub fn y(&self) -> f32 {
+    pub fn y(&self) -> f64 {
         self[1]
     }
     #[inline]
-    pub fn z(&self) -> f32 {
+    pub fn z(&self) -> f64 {
         self[2]
     }
     #[inline]
-    pub fn r(&self) -> f32 {
+    pub fn r(&self) -> f64 {
         self[0]
     }
     #[inline]
-    pub fn g(&self) -> f32 {
+    pub fn g(&self) -> f64 {
         self[1]
     }
     #[inline]
-    pub fn b(&self) -> f32 {
+    pub fn b(&self) -> f64 {
         self[2]
     }
 
     #[inline]
-    pub fn length(&self) -> f32 {
+    pub fn length(&self) -> f64 {
         self.sq_len().sqrt()
     }
 
     #[inline]
-    pub fn sq_len(&self) -> f32 {
+    pub fn sq_len(&self) -> f64 {
         self[0] * self[0] + self[1] * self[1] + self[2] * self[2]
     }
 
     #[inline]
-    pub fn dot(&self, v: &Vec3) -> f32 {
+    pub fn dot(&self, v: &Vec3) -> f64 {
         self[0] * v[0] + self[1] * v[1] + self[2] * v[2]
     }
 
@@ -62,7 +62,7 @@ impl Vec3 {
 
     #[inline]
     pub fn make_unit_vector(&mut self) {
-        let k = 1.0f32 / (self[0] * self[0] + self[1] * self[1] + self[2] * self[2]);
+        let k = 1.0f64 / (self[0] * self[0] + self[1] * self[1] + self[2] * self[2]);
         self[0] *= k;
         self[1] *= k;
         self[2] *= k;
@@ -115,17 +115,17 @@ impl MulAssign<Vec3> for Vec3 {
     }
 }
 
-impl MulAssign<f32> for Vec3 {
-    fn mul_assign(&mut self, o: f32) {
+impl MulAssign<f64> for Vec3 {
+    fn mul_assign(&mut self, o: f64) {
         self[0] *= o;
         self[1] *= o;
         self[2] *= o;
     }
 }
 
-impl Mul<f32> for Vec3 {
+impl Mul<f64> for Vec3 {
     type Output = Vec3;
-    fn mul(self, o: f32) -> Vec3 {
+    fn mul(self, o: f64) -> Vec3 {
         Vec3([self[0] * o, self[1] * o, self[2] * o])
     }
 }
@@ -138,34 +138,34 @@ impl Div<Vec3> for Vec3 {
     }
 }
 
-impl Div<f32> for Vec3 {
+impl Div<f64> for Vec3 {
     type Output = Vec3;
 
-    fn div(self, o: f32) -> Vec3 {
+    fn div(self, o: f64) -> Vec3 {
         let o = 1.0 / o;
         Vec3([self[0] * o, self[1] * o, self[2] * o])
     }
 }
 
-impl DivAssign<f32> for Vec3 {
-    fn div_assign(&mut self, o: f32) {
+impl DivAssign<f64> for Vec3 {
+    fn div_assign(&mut self, o: f64) {
         let o = 1.0 / o;
-        self.0[0] /= o;
-        self.0[1] /= o;
-        self.0[2] /= o;
+        self.0[0] *= o;
+        self.0[1] *= o;
+        self.0[2] *= o;
     }
 }
 
 impl Index<usize> for Vec3 {
-    type Output = f32;
+    type Output = f64;
 
-    fn index(&self, q: usize) -> &f32 {
+    fn index(&self, q: usize) -> &f64 {
         &self.0[q]
     }
 }
 
 impl IndexMut<usize> for Vec3 {
-    fn index_mut(&mut self, q: usize) -> &mut f32 {
+    fn index_mut(&mut self, q: usize) -> &mut f64 {
         &mut self.0[q]
     }
 }

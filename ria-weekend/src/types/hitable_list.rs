@@ -5,7 +5,7 @@ pub struct HitableList {
 }
 
 impl Hitable for HitableList {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut closest_so_far = t_max;
         let mut hit_rec: Option<HitRecord> = None;
         for obj in &self.list {

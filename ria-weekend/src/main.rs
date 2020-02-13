@@ -15,7 +15,7 @@ use {
     },
 };
 
-const NUM_SAMPLES: u8 = 100;
+const NUM_SAMPLES: u8 = 20;
 
 fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
@@ -72,6 +72,7 @@ fn main() -> Result<(), String> {
                         Some(Keycode::Num4) => active_demo = Box::new(demos::SurfaceNormalSphere),
                         Some(Keycode::Num5) => active_demo = Box::new(demos::HitableSphere),
                         Some(Keycode::Num6) => active_demo = Box::new(demos::SimpleAntialiasing),
+                        Some(Keycode::Num7) => active_demo = Box::new(demos::DiffuseMaterials),
                         None => unreachable!(),
                         _ => (),
                     };

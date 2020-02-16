@@ -12,7 +12,15 @@ impl Demo for SimpleSphere {
         "simple_sphere"
     }
 
-    fn render_chunk(&self, buf: &mut [u8], meta: Chunk, _ns: u8) {
+    fn render_chunk(&self, chunk: &mut Chunk, _samples: u8) {
+        let x = chunk.x;
+        let y = chunk.y;
+        let nx = chunk.nx;
+        let ny = chunk.ny;
+        let start_x = chunk.start_x;
+        let start_y = chunk.start_y;
+        let buffer = &mut chunk.buffer;
+
         // Usually, lower_left_corner should've been -1.0,-1.0,-1.0 and
         // horizontal should've been 2.0,0.0,0.0
         // but we are working with a canvas that is 2:1 in size.
@@ -23,19 +31,13 @@ impl Demo for SimpleSphere {
         // stretched horizontally.
         // To prevent this from happening, Since our dimensions are in 2:1 ratio,
         // We adjust the lower_left_corner and horizontal values to scale
-        let Chunk {
-            x,
-            y,
-            nx,
-            ny,
-            start_x,
-            start_y,
-        } = meta;
         let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
         let horizontal = Vec3::new(4.0, 0.0, 0.0);
         let vertical = Vec3::new(0.0, 2.0, 0.0);
         // Observer's position
         let origin = Vec3::new(0.0, 0.0, 0.0);
+
+        let mut offset = 0;
 
         for j in start_y..start_y + ny {
             for i in start_x..start_x + nx {
@@ -46,11 +48,10 @@ impl Demo for SimpleSphere {
 
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
                 let color = calc_color(ray);
-
-                let offset = ((y - j - 1) * x + i) * 4;
-                buf[offset] = (255.99 * color.r()) as u8;
-                buf[offset + 1] = (255.99 * color.g()) as u8;
-                buf[offset + 2] = (255.99 * color.b()) as u8;
+                buffer[offset] = (255.99 * color.r()) as u8;
+                buffer[offset + 1] = (255.99 * color.g()) as u8;
+                buffer[offset + 2] = (255.99 * color.b()) as u8;
+                offset += 4;
             }
         }
     }

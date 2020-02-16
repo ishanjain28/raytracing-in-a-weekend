@@ -30,16 +30,17 @@ pub struct Chunk {
     ny: usize,
     start_x: usize,
     start_y: usize,
+    buffer: Vec<u8>,
 }
 
-pub trait Demo {
+pub trait Demo: std::marker::Sync {
     fn render(&self, buf: &mut [u8], width: usize, height: usize, samples: u8) {
         let nx = width / VERTICAL_PARTITION;
         let ny = height / HORIZONTAL_PARTITION;
 
-        let v = (0..VERTICAL_PARTITION).collect::<Vec<usize>>();
+        let mut chunks: Vec<Chunk> = Vec::with_capacity(HORIZONTAL_PARTITION * VERTICAL_PARTITION);
 
-        for j in v {
+        for j in 0..VERTICAL_PARTITION {
             for i in 0..HORIZONTAL_PARTITION {
                 let start_y = j * ny;
                 let start_x = i * nx;
@@ -50,14 +51,20 @@ pub trait Demo {
                     ny,
                     start_x,
                     start_y,
+                    buffer: vec![0; nx * ny * 4],
                 };
-
-                self.render_chunk(buf, chunk, samples);
+                chunks.push(chunk);
             }
         }
+
+        chunks
+            .par_iter_mut()
+            .for_each(|mut chunk| self.render_chunk(&mut chunk, samples));
+
+        // ((y - j - 1) * x + i) * 4
     }
 
-    fn render_chunk(&self, buf: &mut [u8], meta: Chunk, samples: u8);
+    fn render_chunk(&self, chunk: &mut Chunk, samples: u8);
 
     fn name(&self) -> &'static str;
 

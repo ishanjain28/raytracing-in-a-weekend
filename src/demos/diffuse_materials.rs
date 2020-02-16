@@ -14,15 +14,14 @@ impl Demo for DiffuseMaterials {
         "Diffuse Materials"
     }
 
-    fn render_chunk(&self, buf: &mut [u8], meta: Chunk, samples: u8) {
-        let Chunk {
-            x,
-            y,
-            nx,
-            ny,
-            start_x,
-            start_y,
-        } = meta;
+    fn render_chunk(&self, chunk: &mut Chunk, samples: u8) {
+        let x = chunk.x;
+        let y = chunk.y;
+        let nx = chunk.nx;
+        let ny = chunk.ny;
+        let start_x = chunk.start_x;
+        let start_y = chunk.start_y;
+        let buffer = &mut chunk.buffer;
 
         let world = HitableList {
             list: vec![
@@ -33,7 +32,7 @@ impl Demo for DiffuseMaterials {
 
         let camera: Camera = Default::default();
         let mut rng = rand::thread_rng();
-
+        let mut offset = 0;
         for j in start_y..start_y + ny {
             for i in start_x..start_x + nx {
                 let mut color = Vec3::new(0.0, 0.0, 0.0);
@@ -41,13 +40,11 @@ impl Demo for DiffuseMaterials {
                 for _s in 0..samples {
                     let u = (i as f64 + rng.gen::<f64>()) / x as f64;
                     let v = (j as f64 + rng.gen::<f64>()) / y as f64;
-
                     let r = camera.get_ray(u, v);
                     color += calc_color(r, &world, &mut rng);
                 }
 
                 color /= samples as f64;
-                let offset = ((y - j - 1) * x + i) * 4;
 
                 // Without taking square root of each color, we get a picture that
                 // is quite dark
@@ -55,9 +52,10 @@ impl Demo for DiffuseMaterials {
                 // So, IRL, It *should* look a bit lighter in color
                 // To do that, We apply gamma correction by a factor of 2
                 // which means multiple rgb values by 1/gamma aka 1/2
-                buf[offset] = (255.99 * color.r().sqrt()) as u8;
-                buf[offset + 1] = (255.99 * color.g().sqrt()) as u8;
-                buf[offset + 2] = (255.99 * color.b().sqrt()) as u8;
+                buffer[offset] = (255.99 * color.r().sqrt()) as u8;
+                buffer[offset + 1] = (255.99 * color.g().sqrt()) as u8;
+                buffer[offset + 2] = (255.99 * color.b().sqrt()) as u8;
+                offset += 4;
             }
         }
     }

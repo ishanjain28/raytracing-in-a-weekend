@@ -2,7 +2,6 @@ pub struct LinearGradientRectangle;
 
 use crate::{
     types::{Ray, Vec3},
-    HORIZONTAL_PARTITION, VERTICAL_PARTITION,
     {demos::Chunk, Demo},
 };
 
@@ -11,28 +10,7 @@ impl Demo for LinearGradientRectangle {
         "Linear Gradient Rectangle"
     }
 
-    fn render(&self, buf: &mut [u8], width: usize, height: usize, _samples: u8) {
-        let nx = width / VERTICAL_PARTITION;
-        let ny = height / HORIZONTAL_PARTITION;
-
-        for j in 0..VERTICAL_PARTITION {
-            for i in 0..HORIZONTAL_PARTITION {
-                let start_y = j * ny;
-                let start_x = i * nx;
-                let chunk = Chunk {
-                    x: width,
-                    y: height,
-                    nx,
-                    ny,
-                    start_x,
-                    start_y,
-                };
-
-                self.render_chunk(buf, chunk);
-            }
-        }
-    }
-    fn render_chunk(&self, buf: &mut [u8], meta: Chunk) {
+    fn render_chunk(&self, buf: &mut [u8], meta: Chunk, _samples: u8) {
         let Chunk {
             x,
             y,
@@ -55,8 +33,7 @@ impl Demo for LinearGradientRectangle {
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
 
                 let c = color(ray);
-
-                let offset = (j * x + i) * 4;
+                let offset = ((y - j - 1) * x + i) * 4;
                 buf[offset] = (255.99 * c.r()) as u8;
                 buf[offset + 1] = (255.99 * c.g()) as u8;
                 buf[offset + 2] = (255.99 * c.b()) as u8;

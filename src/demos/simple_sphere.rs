@@ -1,6 +1,6 @@
 use crate::{
+    demos::{Chunk, Demo},
     types::{Ray, Vec3},
-    Demo,
 };
 
 const RADIUS: f64 = 0.5;
@@ -12,7 +12,7 @@ impl Demo for SimpleSphere {
         "simple_sphere"
     }
 
-    fn render(&self, buf: &mut [u8], w: usize, h: usize, _ns: u8) {
+    fn render_chunk(&self, buf: &mut [u8], meta: Chunk, _ns: u8) {
         // Usually, lower_left_corner should've been -1.0,-1.0,-1.0 and
         // horizontal should've been 2.0,0.0,0.0
         // but we are working with a canvas that is 2:1 in size.
@@ -23,27 +23,34 @@ impl Demo for SimpleSphere {
         // stretched horizontally.
         // To prevent this from happening, Since our dimensions are in 2:1 ratio,
         // We adjust the lower_left_corner and horizontal values to scale
-
+        let Chunk {
+            x,
+            y,
+            nx,
+            ny,
+            start_x,
+            start_y,
+        } = meta;
         let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
         let horizontal = Vec3::new(4.0, 0.0, 0.0);
         let vertical = Vec3::new(0.0, 2.0, 0.0);
         // Observer's position
         let origin = Vec3::new(0.0, 0.0, 0.0);
 
-        let mut offset = 0;
-        for j in (0..h).rev() {
-            for i in 0..w {
+        for j in start_y..start_y + ny {
+            for i in start_x..start_x + nx {
                 // relative offsets
                 // current position to total width/length
-                let u = i as f64 / w as f64;
-                let v = j as f64 / h as f64;
+                let u = i as f64 / x as f64;
+                let v = j as f64 / y as f64;
 
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
                 let color = calc_color(ray);
+
+                let offset = ((y - j - 1) * x + i) * 4;
                 buf[offset] = (255.99 * color.r()) as u8;
                 buf[offset + 1] = (255.99 * color.g()) as u8;
                 buf[offset + 2] = (255.99 * color.b()) as u8;
-                offset += 4;
             }
         }
     }

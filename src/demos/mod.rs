@@ -1,22 +1,26 @@
-//mod diffuse_materials;
-//mod hitable_sphere;
+mod diffuse_materials;
+mod hitable_sphere;
 mod linear_gradient_rectangle;
-//mod materials;
-//mod simple_antialiasing;
+mod materials;
+mod simple_antialiasing;
 mod simple_rectangle;
-//mod simple_sphere;
-//mod surface_normal_sphere;
+mod simple_sphere;
+mod surface_normal_sphere;
 
-//pub use diffuse_materials::DiffuseMaterials;
-//pub use hitable_sphere::HitableSphere;
+pub use diffuse_materials::DiffuseMaterials;
+pub use hitable_sphere::HitableSphere;
 pub use linear_gradient_rectangle::LinearGradientRectangle;
-//pub use materials::Materials;
-//pub use simple_antialiasing::SimpleAntialiasing;
+pub use materials::Materials;
+pub use simple_antialiasing::SimpleAntialiasing;
 pub use simple_rectangle::SimpleRectangle;
-//pub use simple_sphere::SimpleSphere;
-//pub use surface_normal_sphere::SurfaceNormalSphere;
+pub use simple_sphere::SimpleSphere;
+pub use surface_normal_sphere::SurfaceNormalSphere;
 
-use std::{fs::File, io::Write};
+use {
+    crate::{HORIZONTAL_PARTITION, VERTICAL_PARTITION},
+    rayon::prelude::*,
+    std::{fs::File, io::Write},
+};
 
 #[derive(Debug)]
 pub struct Chunk {
@@ -29,9 +33,31 @@ pub struct Chunk {
 }
 
 pub trait Demo {
-    fn render(&self, buf: &mut [u8], width: usize, height: usize, samples: u8);
+    fn render(&self, buf: &mut [u8], width: usize, height: usize, samples: u8) {
+        let nx = width / VERTICAL_PARTITION;
+        let ny = height / HORIZONTAL_PARTITION;
 
-    fn render_chunk(&self, buf: &mut [u8], meta: Chunk);
+        let v = (0..VERTICAL_PARTITION).collect::<Vec<usize>>();
+
+        for j in v {
+            for i in 0..HORIZONTAL_PARTITION {
+                let start_y = j * ny;
+                let start_x = i * nx;
+                let chunk = Chunk {
+                    x: width,
+                    y: height,
+                    nx,
+                    ny,
+                    start_x,
+                    start_y,
+                };
+
+                self.render_chunk(buf, chunk, samples);
+            }
+        }
+    }
+
+    fn render_chunk(&self, buf: &mut [u8], meta: Chunk, samples: u8);
 
     fn name(&self) -> &'static str;
 

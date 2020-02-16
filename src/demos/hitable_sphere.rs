@@ -1,5 +1,5 @@
 use crate::{
-    demos::Demo,
+    demos::{Chunk, Demo},
     types::{Hitable, HitableList, Ray, Sphere, Vec3},
 };
 pub struct HitableSphere;
@@ -9,7 +9,16 @@ impl Demo for HitableSphere {
         "Sphere using Hit table"
     }
 
-    fn render(&self, buf: &mut [u8], width: usize, height: usize, _samples: u8) {
+    fn render_chunk(&self, buf: &mut [u8], meta: Chunk, _samples: u8) {
+        let Chunk {
+            x,
+            y,
+            nx,
+            ny,
+            start_x,
+            start_y,
+        } = meta;
+
         let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
         let horizontal = Vec3::new(4.0, 0.0, 0.0);
         let vertical = Vec3::new(0.0, 2.0, 0.0);
@@ -22,18 +31,17 @@ impl Demo for HitableSphere {
             ],
         };
 
-        let mut offset = 0;
-        for j in (0..height).rev() {
-            for i in 0..width {
-                let u = i as f64 / width as f64;
-                let v = j as f64 / height as f64;
+        for j in start_y..start_y + ny {
+            for i in start_x..start_x + nx {
+                let u = i as f64 / x as f64;
+                let v = j as f64 / y as f64;
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
-
                 let color = calc_color(ray, &world);
+
+                let offset = ((y - j - 1) * x + i) * 4;
                 buf[offset] = (255.99 * color.r()) as u8;
                 buf[offset + 1] = (255.99 * color.g()) as u8;
                 buf[offset + 2] = (255.99 * color.b()) as u8;
-                offset += 4;
             }
         }
     }

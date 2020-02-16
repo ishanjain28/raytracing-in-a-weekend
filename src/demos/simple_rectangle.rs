@@ -1,6 +1,5 @@
 use crate::{
     demos::{Chunk, Demo},
-    types::Vec3,
     HORIZONTAL_PARTITION, VERTICAL_PARTITION,
 };
 
@@ -11,7 +10,7 @@ impl Demo for SimpleRectangle {
         "simple_rectangle"
     }
 
-    fn render(&self, buf: &mut [u8], width: usize, height: usize, _samples: u8) {
+    fn render(&self, buf: &mut [u8], width: usize, height: usize, samples: u8) {
         let nx = width / VERTICAL_PARTITION;
         let ny = height / HORIZONTAL_PARTITION;
 
@@ -28,12 +27,12 @@ impl Demo for SimpleRectangle {
                     start_y,
                 };
 
-                self.render_chunk(buf, chunk);
+                self.render_chunk(buf, chunk, samples);
             }
         }
     }
 
-    fn render_chunk(&self, buf: &mut [u8], meta: Chunk) {
+    fn render_chunk(&self, buf: &mut [u8], meta: Chunk, _samples: u8) {
         let Chunk {
             x,
             y,
@@ -46,7 +45,7 @@ impl Demo for SimpleRectangle {
         for j in start_y..start_y + ny {
             for i in start_x..start_x + nx {
                 let color = [i as f64 / x as f64, j as f64 / y as f64, 0.2];
-                let offset = (j * x + i) * 4;
+                let offset = ((y - j - 1) * x + i) * 4;
 
                 buf[offset] = (255.99 * color[0]) as u8;
                 buf[offset + 1] = (255.99 * color[1]) as u8;

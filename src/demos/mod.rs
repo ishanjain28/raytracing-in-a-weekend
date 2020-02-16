@@ -34,7 +34,7 @@ pub struct Chunk {
 }
 
 pub trait Demo: std::marker::Sync {
-    fn render(&self, buf: &mut [u8], width: usize, height: usize, samples: u8) {
+    fn render(&self, buf: &mut Vec<u8>, width: usize, height: usize, samples: u8) {
         let nx = width / VERTICAL_PARTITION;
         let ny = height / HORIZONTAL_PARTITION;
 
@@ -61,7 +61,28 @@ pub trait Demo: std::marker::Sync {
             .par_iter_mut()
             .for_each(|mut chunk| self.render_chunk(&mut chunk, samples));
 
-        // ((y - j - 1) * x + i) * 4
+        for chunk in chunks {
+            let x = chunk.x;
+            let y = chunk.y;
+            let nx = chunk.nx;
+            let ny = chunk.ny;
+            let start_x = chunk.start_x;
+            let start_y = chunk.start_y;
+            let buffer = chunk.buffer;
+
+            let mut temp_offset = 0;
+            for j in start_y..start_y + ny {
+                for i in start_x..start_x + nx {
+                    let real_offset = ((y - j - 1) * x + i) * 4;
+
+                    for k in 0..4 {
+                        buf[real_offset + k] = buffer[temp_offset + k];
+                    }
+
+                    temp_offset += 4;
+                }
+            }
+        }
     }
 
     fn render_chunk(&self, chunk: &mut Chunk, samples: u8);

@@ -19,7 +19,11 @@ pub use surface_normal_sphere::SurfaceNormalSphere;
 use {
     crate::{HORIZONTAL_PARTITION, VERTICAL_PARTITION},
     rayon::prelude::*,
-    std::{fs::File, io::Write},
+    std::{
+        fs::File,
+        io::Write,
+        sync::{Arc, Mutex},
+    },
 };
 
 #[derive(Debug)]
@@ -38,51 +42,41 @@ pub trait Demo: std::marker::Sync {
         let nx = width / VERTICAL_PARTITION;
         let ny = height / HORIZONTAL_PARTITION;
 
-        let mut chunks: Vec<Chunk> = Vec::with_capacity(HORIZONTAL_PARTITION * VERTICAL_PARTITION);
+        let buf = Arc::new(Mutex::new(buf));
 
-        for j in 0..VERTICAL_PARTITION {
-            for i in 0..HORIZONTAL_PARTITION {
-                let start_y = j * ny;
-                let start_x = i * nx;
-                let chunk = Chunk {
-                    x: width,
-                    y: height,
-                    nx,
-                    ny,
-                    start_x,
-                    start_y,
-                    buffer: vec![0; nx * ny * 4],
-                };
-                chunks.push(chunk);
-            }
-        }
+        (0..VERTICAL_PARTITION).into_par_iter().for_each(move |j| {
+            let buf = buf.clone();
+            (0..HORIZONTAL_PARTITION)
+                .into_par_iter()
+                .for_each(move |i| {
+                    let start_y = j * ny;
+                    let start_x = i * nx;
+                    let x = width;
+                    let y = height;
+                    let mut chunk = Chunk {
+                        x,
+                        y,
+                        nx,
+                        ny,
+                        start_x,
+                        start_y,
+                        buffer: vec![0; nx * ny * 4],
+                    };
+                    self.render_chunk(&mut chunk, samples);
 
-        chunks
-            .par_iter_mut()
-            .for_each(|mut chunk| self.render_chunk(&mut chunk, samples));
+                    let mut buf = buf.lock().unwrap();
 
-        for chunk in chunks {
-            let x = chunk.x;
-            let y = chunk.y;
-            let nx = chunk.nx;
-            let ny = chunk.ny;
-            let start_x = chunk.start_x;
-            let start_y = chunk.start_y;
-            let buffer = chunk.buffer;
+                    let mut temp_offset = 0;
+                    for j in start_y..start_y + ny {
+                        let real_offset = ((y - j - 1) * x + start_x) * 4;
 
-            let mut temp_offset = 0;
-            for j in start_y..start_y + ny {
-                for i in start_x..start_x + nx {
-                    let real_offset = ((y - j - 1) * x + i) * 4;
+                        buf[real_offset..real_offset + nx * 4]
+                            .copy_from_slice(&chunk.buffer[temp_offset..temp_offset + nx * 4]);
 
-                    for k in 0..4 {
-                        buf[real_offset + k] = buffer[temp_offset + k];
+                        temp_offset += nx * 4;
                     }
-
-                    temp_offset += 4;
-                }
-            }
-        }
+                })
+        });
     }
 
     fn render_chunk(&self, chunk: &mut Chunk, samples: u8);

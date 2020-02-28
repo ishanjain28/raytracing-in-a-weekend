@@ -100,8 +100,8 @@ fn main() -> Result<(), String> {
         }
         if should_update {
             active_demo.render(&mut buffer, width, height, NUM_SAMPLES);
-            texture.update(None, &buffer, width * 4);
-            canvas.copy(&texture, None, None);
+            texture.update(None, &buffer, width * 4).unwrap();
+            canvas.copy(&texture, None, None).unwrap();
             canvas.present();
             should_update = false;
         }

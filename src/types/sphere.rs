@@ -1,4 +1,5 @@
 use crate::types::{HitRecord, Hitable, Material, Ray, Vec3};
+
 pub struct Sphere {
     center: Vec3,
     radius: f64,
@@ -36,9 +37,10 @@ impl Hitable for Sphere {
         // Check this for detailed proof
         // https://vchizhov.github.io/resources/ray%20tracing/ray%20tracing%20tutorial%20series%20vchizhov/ray_casting/part1/intersecting_a_sphere.md.html#appendix
         let discriminant = b * b - a * c;
+        let discriminant_root = discriminant.sqrt();
 
         if discriminant > 0.0 {
-            let root = (-b - discriminant.sqrt()) / a;
+            let root = (-b - discriminant_root) / a;
             if root < t_max && root > t_min {
                 let p = ray.point_at_parameter(root);
                 return Some(HitRecord {
@@ -49,7 +51,7 @@ impl Hitable for Sphere {
                 });
             }
 
-            let root = (-b + discriminant.sqrt()) / a;
+            let root = (-b + discriminant_root) / a;
             if root < t_max && root > t_min {
                 let p = ray.point_at_parameter(root);
 

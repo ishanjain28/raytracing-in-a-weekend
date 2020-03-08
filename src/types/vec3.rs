@@ -1,6 +1,6 @@
 use std::{
     fmt::{Display, Formatter, Result as FmtResult},
-    ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
 #[derive(Copy, Clone)]
@@ -104,6 +104,14 @@ impl SubAssign for Vec3 {
         self[0] -= o[0];
         self[1] -= o[1];
         self[2] -= o[2];
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Vec3 {
+        Vec3([-self[0], -self[1], -self[2]])
     }
 }
 

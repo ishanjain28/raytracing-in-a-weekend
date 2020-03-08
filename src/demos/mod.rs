@@ -1,3 +1,4 @@
+mod dielectric_material;
 mod diffuse_materials;
 mod hitable_sphere;
 mod linear_gradient_rectangle;
@@ -7,6 +8,7 @@ mod simple_rectangle;
 mod simple_sphere;
 mod surface_normal_sphere;
 
+pub use dielectric_material::DielectricMaterial;
 pub use diffuse_materials::DiffuseMaterials;
 pub use hitable_sphere::HitableSphere;
 pub use linear_gradient_rectangle::LinearGradientRectangle;

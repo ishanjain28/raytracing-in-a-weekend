@@ -78,6 +78,7 @@ fn main() -> Result<(), String> {
                         Some(Keycode::Num6) => active_demo = Box::new(demos::SimpleAntialiasing),
                         Some(Keycode::Num7) => active_demo = Box::new(demos::DiffuseMaterials),
                         Some(Keycode::Num8) => active_demo = Box::new(demos::Materials),
+                        Some(Keycode::Num9) => active_demo = Box::new(demos::DielectricMaterial),
                         None => unreachable!(),
                         _ => (),
                     };

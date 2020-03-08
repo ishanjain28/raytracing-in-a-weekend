@@ -67,7 +67,7 @@ fn calc_color(ray: Ray, world: &HitableList, rng: &mut rand::rngs::ThreadRng) ->
     // To combat this problem, We set a bias
     // More information here, https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/#shadow-acne
     if let Some(hit_rec) = world.hit(&ray, 0.001, std::f64::MAX) {
-        let target = hit_rec.p + hit_rec.normal + random_point_in_unit_space(rng);
+        let target = hit_rec.p + hit_rec.normal + random_point_in_unit_sphere(rng);
         calc_color(Ray::new(hit_rec.p, target - hit_rec.p), &world, rng) * 0.5
     } else {
         let unit_direction = ray.direction().unit_vector();
@@ -76,7 +76,7 @@ fn calc_color(ray: Ray, world: &HitableList, rng: &mut rand::rngs::ThreadRng) ->
     }
 }
 
-fn random_point_in_unit_space(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
+fn random_point_in_unit_sphere(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
     let mut point = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>()) * 2.0
         - Vec3::new(1.0, 1.0, 1.0);
     while point.sq_len() >= 1.0 {

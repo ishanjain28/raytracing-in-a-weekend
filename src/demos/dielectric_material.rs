@@ -2,7 +2,7 @@ use {
     crate::{
         demos::{Chunk, Demo},
         types::{
-            material::{Lambertian, Metal},
+            material::{Dielectric, Lambertian, Metal},
             Hitable, HitableList, Ray, Sphere, Vec3,
         },
         Camera,
@@ -10,11 +10,11 @@ use {
     rand::Rng,
 };
 
-pub struct Materials;
+pub struct DielectricMaterial;
 
-impl Demo for Materials {
+impl Demo for DielectricMaterial {
     fn name(&self) -> &'static str {
-        "metal-material"
+        "dielectric-material"
     }
 
     fn render_chunk(&self, chunk: &mut Chunk, samples: u8) {
@@ -31,7 +31,7 @@ impl Demo for Materials {
                 Box::new(Sphere::with_material(
                     Vec3::new(0.0, 0.0, -1.0),
                     0.5,
-                    Box::new(Lambertian::new(Vec3::new(0.8, 0.3, 0.3))),
+                    Box::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))),
                 )),
                 Box::new(Sphere::with_material(
                     Vec3::new(0.0, -100.5, -1.0),
@@ -41,12 +41,17 @@ impl Demo for Materials {
                 Box::new(Sphere::with_material(
                     Vec3::new(1.0, 0.0, -1.0),
                     0.5,
-                    Box::new(Metal::with_fuzz(Vec3::new(0.8, 0.6, 0.2), 0.3)),
+                    Box::new(Metal::new(Vec3::new(0.8, 0.6, 0.2))),
                 )),
                 Box::new(Sphere::with_material(
                     Vec3::new(-1.0, 0.0, -1.0),
                     0.5,
-                    Box::new(Metal::with_fuzz(Vec3::new(0.8, 0.8, 0.8), 0.5)),
+                    Box::new(Dielectric::new(1.5)),
+                )),
+                Box::new(Sphere::with_material(
+                    Vec3::new(-1.0, 0.0, -1.0),
+                    -0.45,
+                    Box::new(Dielectric::new(1.5)),
                 )),
             ],
         };

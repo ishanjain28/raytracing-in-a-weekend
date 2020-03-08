@@ -13,6 +13,7 @@ use {
         keyboard::Keycode,
         pixels::PixelFormatEnum,
     },
+    std::time::Instant,
 };
 
 const NUM_SAMPLES: u8 = 100;
@@ -100,7 +101,14 @@ fn main() -> Result<(), String> {
             };
         }
         if should_update {
+            let now = Instant::now();
             active_demo.render(&mut buffer, width, height, NUM_SAMPLES);
+            println!(
+                "Demo {} Time Taken(s) = {}",
+                active_demo.name(),
+                now.elapsed().as_secs_f64()
+            );
+
             texture.update(None, &buffer, width * 4).unwrap();
             canvas.copy(&texture, None, None).unwrap();
             canvas.present();

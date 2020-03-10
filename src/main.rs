@@ -17,7 +17,6 @@ use {
 };
 
 const NUM_SAMPLES: u8 = 100;
-
 const VERTICAL_PARTITION: usize = 8;
 const HORIZONTAL_PARTITION: usize = 8;
 
@@ -80,6 +79,7 @@ fn main() -> Result<(), String> {
                         Some(Keycode::Num7) => active_demo = Box::new(demos::DiffuseMaterials),
                         Some(Keycode::Num8) => active_demo = Box::new(demos::Materials),
                         Some(Keycode::Num9) => active_demo = Box::new(demos::DielectricMaterial),
+                        Some(Keycode::Num0) => active_demo = Box::new(demos::PositionableCamera),
                         None => unreachable!(),
                         _ => (),
                     };

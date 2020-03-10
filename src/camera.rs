@@ -8,17 +8,31 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub const fn new(
-        origin: Vec3,
-        horizontal: Vec3,
-        vertical: Vec3,
-        lower_left_corner: Vec3,
-    ) -> Self {
+    // vertical_fov is the viewable angle from top->bottom
+    // look_from is basically camera position
+    // look_at is the point where camera is looking
+    // v_up is camera's up vector. i.e. it points upwards from the camera
+    // orthogonal to look_from - look_at vector
+    pub fn new(look_from: Vec3, look_at: Vec3, v_up: Vec3, vertical_fov: f64, aspect: f64) -> Self {
+        // convert degree to radian
+        let angle = vertical_fov * std::f64::consts::PI / 180.0;
+        let half_height = (angle / 2.0).tan();
+        let half_width = aspect * half_height;
+
+        let origin = look_from;
+        let w = (look_from - look_at).unit_vector();
+        let u = v_up.cross(&w).unit_vector();
+        let v = w.cross(&u);
+
+        let lower_left_corner = origin - u * half_width - v * half_height - w;
+        let horizontal = u * half_width * 2.0;
+        let vertical = v * half_height * 2.0;
+
         Self {
-            origin,
+            lower_left_corner,
             horizontal,
             vertical,
-            lower_left_corner,
+            origin,
         }
     }
 
@@ -32,12 +46,13 @@ impl Camera {
 
 impl std::default::Default for Camera {
     fn default() -> Self {
-        Camera {
-            origin: Vec3::new(0.0, 0.0, 0.0),
-            // Because canvas is in 2:1 ratio
-            horizontal: Vec3::new(4.0, 0.0, 0.0),
-            vertical: Vec3::new(0.0, 2.0, 0.0),
-            lower_left_corner: Vec3::new(-2.0, -1.0, -1.0),
-        }
+        Camera::new(
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, -1.0),
+            Vec3::new(0.0, 1.0, 0.0),
+            90.0,
+            // 2:1 aspect ratio width:height
+            2.0,
+        )
     }
 }

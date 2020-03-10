@@ -7,7 +7,7 @@ use crate::{
 
 impl Demo for LinearGradientRectangle {
     fn name(&self) -> &'static str {
-        "Linear Gradient Rectangle"
+        "linear-gradient-rectangle"
     }
 
     fn render_chunk(&self, chunk: &mut Chunk, _samples: u8) {

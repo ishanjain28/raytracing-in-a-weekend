@@ -6,7 +6,7 @@ pub struct HitableSphere;
 
 impl Demo for HitableSphere {
     fn name(&self) -> &'static str {
-        "Sphere using Hit table"
+        "sphere-using-hit-table"
     }
 
     fn render_chunk(&self, chunk: &mut Chunk, _samples: u8) {

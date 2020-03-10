@@ -11,7 +11,7 @@ pub struct DiffuseMaterials;
 
 impl Demo for DiffuseMaterials {
     fn name(&self) -> &'static str {
-        "Diffuse Materials"
+        "diffuse-materials"
     }
 
     fn render_chunk(&self, chunk: &mut Chunk, samples: u8) {

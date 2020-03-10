@@ -10,7 +10,7 @@ pub struct SimpleAntialiasing;
 
 impl Demo for SimpleAntialiasing {
     fn name(&self) -> &'static str {
-        "A simple antialiasing implementation"
+        "simple-antialiasing"
     }
     fn render_chunk(&self, chunk: &mut Chunk, samples: u8) {
         let x = chunk.x;

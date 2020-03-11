@@ -21,7 +21,7 @@ pub struct HitRecord<'a> {
     pub material: Option<&'a Box<dyn Material>>,
 }
 
-pub trait Hitable {
+pub trait Hitable: Send + Sync {
     fn hit(&self, _ray: &Ray, _t_min: f64, _t_max: f64) -> Option<HitRecord> {
         None
     }

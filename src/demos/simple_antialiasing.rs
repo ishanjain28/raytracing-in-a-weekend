@@ -12,7 +12,23 @@ impl Demo for SimpleAntialiasing {
     fn name(&self) -> &'static str {
         "simple-antialiasing"
     }
-    fn render_chunk(&self, chunk: &mut Chunk, samples: u8) {
+
+    fn world(&self) -> Option<HitableList> {
+        Some(HitableList {
+            list: vec![
+                Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
+                Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)),
+            ],
+        })
+    }
+
+    fn render_chunk(
+        &self,
+        chunk: &mut Chunk,
+        camera: Option<&Camera>,
+        world: Option<&HitableList>,
+        samples: u8,
+    ) {
         let x = chunk.x;
         let y = chunk.y;
         let nx = chunk.nx;
@@ -20,15 +36,8 @@ impl Demo for SimpleAntialiasing {
         let start_x = chunk.start_x;
         let start_y = chunk.start_y;
         let buffer = &mut chunk.buffer;
+        let camera = camera.unwrap();
 
-        let world = HitableList {
-            list: vec![
-                Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
-                Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)),
-            ],
-        };
-
-        let camera: Camera = Default::default();
         let mut rng = rand::thread_rng();
         let mut offset = 0;
 
@@ -40,7 +49,7 @@ impl Demo for SimpleAntialiasing {
                     let v = (j as f64 + rng.gen::<f64>()) / y as f64;
 
                     let r = camera.get_ray(u, v);
-                    color += calc_color(r, &world);
+                    color += calc_color(r, world.unwrap());
                 }
                 color /= samples as f64;
                 buffer[offset] = (255.99 * color.r()) as u8;

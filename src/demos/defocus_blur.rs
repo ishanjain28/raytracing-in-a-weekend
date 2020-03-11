@@ -10,43 +10,56 @@ use {
     rand::Rng,
 };
 
-pub struct DielectricMaterial;
+pub struct DefocusBlur;
 
-impl Demo for DielectricMaterial {
+impl Demo for DefocusBlur {
     fn name(&self) -> &'static str {
-        "dielectric-material"
+        "defocus-blur"
     }
 
     fn world(&self) -> Option<HitableList> {
+        let radius = (std::f64::consts::PI / 4.0).cos();
         Some(HitableList {
             list: vec![
                 Box::new(Sphere::with_material(
-                    Vec3::new(0.0, 0.0, -1.0),
-                    0.5,
-                    Box::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))),
+                    Vec3::new(-radius, 0.0, -1.0),
+                    radius,
+                    Box::new(Lambertian::new(Vec3::new(0.0, 0.0, 1.0))),
+                )),
+                Box::new(Sphere::with_material(
+                    Vec3::new(radius, 0.0, -1.0),
+                    radius,
+                    Box::new(Metal::with_fuzz(Vec3::new(0.5, 0.5, 0.0), 0.2)),
+                )),
+                Box::new(Sphere::with_material(
+                    Vec3::new(-3.0 * radius, 0.0, -1.0),
+                    radius,
+                    Box::new(Dielectric::new(1.5)),
                 )),
                 Box::new(Sphere::with_material(
                     Vec3::new(0.0, -100.5, -1.0),
                     100.0,
                     Box::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))),
                 )),
-                Box::new(Sphere::with_material(
-                    Vec3::new(1.0, 0.0, -1.0),
-                    0.5,
-                    Box::new(Metal::new(Vec3::new(0.8, 0.6, 0.2))),
-                )),
-                Box::new(Sphere::with_material(
-                    Vec3::new(-1.0, 0.0, -1.0),
-                    0.5,
-                    Box::new(Dielectric::new(1.5)),
-                )),
-                Box::new(Sphere::with_material(
-                    Vec3::new(-1.0, 0.0, -1.0),
-                    -0.45,
-                    Box::new(Dielectric::new(1.5)),
-                )),
             ],
         })
+    }
+
+    fn camera(&self, aspect_ratio: f64) -> Option<Camera> {
+        let lookfrom = Vec3::new(3.0, 3.0, 2.0);
+        let lookat = Vec3::new(0.0, 0.0, -1.0);
+        let aperture = 2.0;
+        let distance_to_focus = (lookfrom - lookat).length();
+        let camera = Camera::new(
+            lookfrom,
+            lookat,
+            Vec3::new(0.0, 1.0, 0.0),
+            20.0,
+            aspect_ratio,
+            aperture,
+            distance_to_focus,
+        );
+        Some(camera)
     }
 
     fn render_chunk(

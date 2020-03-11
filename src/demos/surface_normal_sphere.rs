@@ -1,6 +1,7 @@
 use crate::{
     demos::{Chunk, Demo},
-    types::{Ray, Vec3},
+    types::{HitableList, Ray, Vec3},
+    Camera,
 };
 
 const RADIUS: f64 = 0.5;
@@ -11,7 +12,13 @@ impl Demo for SurfaceNormalSphere {
         "surface_normal_sphere"
     }
 
-    fn render_chunk(&self, chunk: &mut Chunk, _samples: u8) {
+    fn render_chunk(
+        &self,
+        chunk: &mut Chunk,
+        _camera: Option<&Camera>,
+        _world: Option<&HitableList>,
+        _samples: u8,
+    ) {
         let x = chunk.x;
         let y = chunk.y;
         let nx = chunk.nx;

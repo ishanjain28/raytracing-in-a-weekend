@@ -14,7 +14,22 @@ impl Demo for DiffuseMaterials {
         "diffuse-materials"
     }
 
-    fn render_chunk(&self, chunk: &mut Chunk, samples: u8) {
+    fn world(&self) -> Option<HitableList> {
+        Some(HitableList {
+            list: vec![
+                Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
+                Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)),
+            ],
+        })
+    }
+
+    fn render_chunk(
+        &self,
+        chunk: &mut Chunk,
+        camera: Option<&Camera>,
+        world: Option<&HitableList>,
+        samples: u8,
+    ) {
         let x = chunk.x;
         let y = chunk.y;
         let nx = chunk.nx;
@@ -22,15 +37,9 @@ impl Demo for DiffuseMaterials {
         let start_x = chunk.start_x;
         let start_y = chunk.start_y;
         let buffer = &mut chunk.buffer;
+        let camera = camera.unwrap();
+        let world = world.unwrap();
 
-        let world = HitableList {
-            list: vec![
-                Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
-                Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)),
-            ],
-        };
-
-        let camera: Camera = Default::default();
         let mut rng = rand::thread_rng();
         let mut offset = 0;
         for j in start_y..start_y + ny {

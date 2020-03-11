@@ -1,10 +1,19 @@
-use crate::types::{Ray, Vec3};
+use {
+    crate::types::{Ray, Vec3},
+    rand::Rng,
+};
 
 pub struct Camera {
-    pub origin: Vec3,
-    pub horizontal: Vec3,
-    pub vertical: Vec3,
-    pub lower_left_corner: Vec3,
+    origin: Vec3,
+    horizontal: Vec3,
+    vertical: Vec3,
+    lower_left_corner: Vec3,
+    lens_radius: f64,
+
+    // position vectors
+    u: Vec3,
+    v: Vec3,
+    w: Vec3,
 }
 
 impl Camera {
@@ -13,7 +22,15 @@ impl Camera {
     // look_at is the point where camera is looking
     // v_up is camera's up vector. i.e. it points upwards from the camera
     // orthogonal to look_from - look_at vector
-    pub fn new(look_from: Vec3, look_at: Vec3, v_up: Vec3, vertical_fov: f64, aspect: f64) -> Self {
+    pub fn new(
+        look_from: Vec3,
+        look_at: Vec3,
+        v_up: Vec3,
+        vertical_fov: f64,
+        aspect: f64,
+        aperture: f64,
+        focus_distance: f64,
+    ) -> Self {
         // convert degree to radian
         let angle = vertical_fov * std::f64::consts::PI / 180.0;
         let half_height = (angle / 2.0).tan();
@@ -24,35 +41,42 @@ impl Camera {
         let u = v_up.cross(&w).unit_vector();
         let v = w.cross(&u);
 
-        let lower_left_corner = origin - u * half_width - v * half_height - w;
+        let lower_left_corner = origin
+            - u * focus_distance * half_width
+            - v * focus_distance * half_height
+            - w * focus_distance;
         let horizontal = u * half_width * 2.0;
         let vertical = v * half_height * 2.0;
+        let lens_radius = aperture / 2.0;
 
         Self {
+            lens_radius,
             lower_left_corner,
             horizontal,
             vertical,
             origin,
+            u,
+            v,
+            w,
         }
     }
 
     pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+        let mut rng = rand::thread_rng();
+        let rd = random_in_unit_disk(&mut rng) * self.lens_radius;
+        let offset = self.u * rd.x() + self.v * rd.y();
         Ray::new(
-            self.origin,
-            self.lower_left_corner + self.horizontal * u + self.vertical * v - self.origin,
+            self.origin + offset,
+            self.lower_left_corner + self.horizontal * u + self.vertical * v - self.origin - offset,
         )
     }
 }
 
-impl std::default::Default for Camera {
-    fn default() -> Self {
-        Camera::new(
-            Vec3::new(0.0, 0.0, 0.0),
-            Vec3::new(0.0, 0.0, -1.0),
-            Vec3::new(0.0, 1.0, 0.0),
-            90.0,
-            // 2:1 aspect ratio width:height
-            2.0,
-        )
+fn random_in_unit_disk(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
+    let mut p = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), 0.0) * 2.0 - Vec3::new(1.0, 0.0, 0.0);
+
+    while p.dot(&p) >= 1.0 {
+        p = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), 0.0) * 2.0 - Vec3::new(1.0, 0.0, 0.0);
     }
+    p
 }

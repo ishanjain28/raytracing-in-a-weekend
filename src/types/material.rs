@@ -3,7 +3,7 @@ use {
     rand::Rng,
 };
 
-pub trait Material {
+pub trait Material: Send + Sync {
     fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> (Vec3, Option<Ray>);
 }
 
@@ -106,7 +106,8 @@ impl Material for Dielectric {
     }
 }
 
-// Polynomial approximation to figure out reflectivity as the angle changes
+// Christophe Schlick's Polynomial approximation to figure out reflectivity as the angle changes
+// See Fresnel Equations, https://en.wikipedia.org/wiki/Fresnel_equations
 fn schlick(cosine: f64, reflection_index: f64) -> f64 {
     let mut r0 = (1.0 - reflection_index) / (1.0 + reflection_index);
     r0 = r0 * r0;

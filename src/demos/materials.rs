@@ -17,16 +17,8 @@ impl Demo for Materials {
         "metal-material"
     }
 
-    fn render_chunk(&self, chunk: &mut Chunk, samples: u8) {
-        let x = chunk.x;
-        let y = chunk.y;
-        let nx = chunk.nx;
-        let ny = chunk.ny;
-        let start_x = chunk.start_x;
-        let start_y = chunk.start_y;
-        let buffer = &mut chunk.buffer;
-
-        let world = HitableList {
+    fn world(&self) -> Option<HitableList> {
+        Some(HitableList {
             list: vec![
                 Box::new(Sphere::with_material(
                     Vec3::new(0.0, 0.0, -1.0),
@@ -49,9 +41,25 @@ impl Demo for Materials {
                     Box::new(Metal::with_fuzz(Vec3::new(0.8, 0.8, 0.8), 0.5)),
                 )),
             ],
-        };
+        })
+    }
 
-        let camera: Camera = Default::default();
+    fn render_chunk(
+        &self,
+        chunk: &mut Chunk,
+        camera: Option<&Camera>,
+        world: Option<&HitableList>,
+        samples: u8,
+    ) {
+        let x = chunk.x;
+        let y = chunk.y;
+        let nx = chunk.nx;
+        let ny = chunk.ny;
+        let start_x = chunk.start_x;
+        let start_y = chunk.start_y;
+        let buffer = &mut chunk.buffer;
+        let camera = camera.unwrap();
+
         let mut rng = rand::thread_rng();
         let mut offset = 0;
 
@@ -63,7 +71,7 @@ impl Demo for Materials {
                     let v = (j as f64 + rng.gen::<f64>()) / y as f64;
 
                     let ray = camera.get_ray(u, v);
-                    color += calc_color(ray, &world, 0);
+                    color += calc_color(ray, world.unwrap(), 0);
                 }
 
                 color /= samples as f64;

@@ -1,4 +1,8 @@
-use crate::demos::{Chunk, Demo};
+use crate::{
+    demos::{Chunk, Demo},
+    types::HitableList,
+    Camera,
+};
 
 pub struct SimpleRectangle;
 
@@ -7,7 +11,13 @@ impl Demo for SimpleRectangle {
         "simple_rectangle"
     }
 
-    fn render_chunk(&self, chunk: &mut Chunk, _samples: u8) {
+    fn render_chunk(
+        &self,
+        chunk: &mut Chunk,
+        _camera: Option<&Camera>,
+        _world: Option<&HitableList>,
+        _samples: u8,
+    ) {
         let x = chunk.x;
         let y = chunk.y;
         let nx = chunk.nx;

@@ -1,6 +1,7 @@
 use crate::{
     demos::{Chunk, Demo},
     types::{Hitable, HitableList, Ray, Sphere, Vec3},
+    Camera,
 };
 pub struct HitableSphere;
 
@@ -9,7 +10,22 @@ impl Demo for HitableSphere {
         "sphere-using-hit-table"
     }
 
-    fn render_chunk(&self, chunk: &mut Chunk, _samples: u8) {
+    fn world(&self) -> Option<HitableList> {
+        Some(HitableList {
+            list: vec![
+                Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
+                Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)),
+            ],
+        })
+    }
+
+    fn render_chunk(
+        &self,
+        chunk: &mut Chunk,
+        _camera: Option<&Camera>,
+        world: Option<&HitableList>,
+        _samples: u8,
+    ) {
         let x = chunk.x;
         let y = chunk.y;
         let nx = chunk.nx;
@@ -17,18 +33,13 @@ impl Demo for HitableSphere {
         let start_x = chunk.start_x;
         let start_y = chunk.start_y;
         let buffer = &mut chunk.buffer;
+        let world = world.unwrap();
 
         let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);
         let horizontal = Vec3::new(4.0, 0.0, 0.0);
         let vertical = Vec3::new(0.0, 2.0, 0.0);
         let origin = Vec3::new(0.0, 0.0, 0.0);
 
-        let world = HitableList {
-            list: vec![
-                Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)),
-                Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)),
-            ],
-        };
         let mut offset = 0;
         for j in start_y..start_y + ny {
             for i in start_x..start_x + nx {

@@ -17,17 +17,9 @@ impl Demo for PositionableCamera {
         "positionable-camera"
     }
 
-    fn render_chunk(&self, chunk: &mut Chunk, samples: u8) {
-        let x = chunk.x;
-        let y = chunk.y;
-        let nx = chunk.nx;
-        let ny = chunk.ny;
-        let start_x = chunk.start_x;
-        let start_y = chunk.start_y;
-        let buffer = &mut chunk.buffer;
+    fn world(&self) -> Option<HitableList> {
         let radius = (std::f64::consts::PI / 4.0).cos();
-
-        let world = HitableList {
+        Some(HitableList {
             list: vec![
                 Box::new(Sphere::with_material(
                     Vec3::new(-radius, 0.0, -1.0),
@@ -50,15 +42,39 @@ impl Demo for PositionableCamera {
                     Box::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))),
                 )),
             ],
-        };
+        })
+    }
 
-        let camera = Camera::new(
-            Vec3::new(-2.0, 2.0, 1.0),
-            Vec3::new(0.0, 0.0, -1.0),
+    fn camera(&self, aspect_ratio: f64) -> Option<Camera> {
+        let lookfrom = Vec3::new(-2.0, 2.0, 1.0);
+        let lookat = Vec3::new(0.0, 0.0, -1.0);
+        Some(Camera::new(
+            lookfrom,
+            lookat,
             Vec3::new(0.0, 1.0, 0.0),
             68.0,
-            nx as f64 / ny as f64,
-        );
+            aspect_ratio,
+            0.0,
+            1.0,
+        ))
+    }
+
+    fn render_chunk(
+        &self,
+        chunk: &mut Chunk,
+        camera: Option<&Camera>,
+        world: Option<&HitableList>,
+        samples: u8,
+    ) {
+        let x = chunk.x;
+        let y = chunk.y;
+        let nx = chunk.nx;
+        let ny = chunk.ny;
+        let start_x = chunk.start_x;
+        let start_y = chunk.start_y;
+        let buffer = &mut chunk.buffer;
+        let camera = camera.unwrap();
+        let world = world.unwrap();
         let mut rng = rand::thread_rng();
         let mut offset = 0;
 
@@ -72,9 +88,7 @@ impl Demo for PositionableCamera {
                     let ray = camera.get_ray(u, v);
                     color += calc_color(ray, &world, 0);
                 }
-
                 color /= samples as f64;
-
                 // gamma 2 corrected
                 buffer[offset] = (255.99 * color.r().sqrt()) as u8;
                 buffer[offset + 1] = (255.99 * color.g().sqrt()) as u8;

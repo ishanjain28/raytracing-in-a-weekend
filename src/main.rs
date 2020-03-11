@@ -80,6 +80,7 @@ fn main() -> Result<(), String> {
                         Some(Keycode::Num8) => active_demo = Box::new(demos::Materials),
                         Some(Keycode::Num9) => active_demo = Box::new(demos::DielectricMaterial),
                         Some(Keycode::Num0) => active_demo = Box::new(demos::PositionableCamera),
+                        Some(Keycode::Minus) => active_demo = Box::new(demos::DefocusBlur),
                         None => unreachable!(),
                         _ => (),
                     };

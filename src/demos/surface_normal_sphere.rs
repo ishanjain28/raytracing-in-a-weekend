@@ -19,14 +19,15 @@ impl Demo for SurfaceNormalSphere {
         _world: Option<&HitableList>,
         _samples: u8,
     ) {
-        let x = chunk.x;
-        let y = chunk.y;
-        let nx = chunk.nx;
-        let ny = chunk.ny;
-        let start_x = chunk.start_x;
-        let start_y = chunk.start_y;
-        let buffer = &mut chunk.buffer;
-
+        let &mut Chunk {
+            x,
+            y,
+            nx,
+            ny,
+            start_x,
+            start_y,
+            ref mut buffer,
+        } = chunk;
         // Usually, lower_left_corner should've been -1.0,-1.0,-1.0 and
         // horizontal should've been 2.0,0.0,0.0
         // but we are working with a canvas that is 2:1 in size.

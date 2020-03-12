@@ -39,14 +39,14 @@ impl Demo for DefocusBlur {
                 Box::new(Sphere::with_material(
                     Vec3::new(0.0, -100.5, -1.0),
                     100.0,
-                    Box::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))),
+                    Box::new(Lambertian::new(Vec3::new(0.2, 0.2, 0.6))),
                 )),
             ],
         })
     }
 
     fn camera(&self, aspect_ratio: f64) -> Option<Camera> {
-        let lookfrom = Vec3::new(3.0, 3.0, 2.0);
+        let lookfrom = Vec3::new(3.0, 3.0, 3.0);
         let lookat = Vec3::new(0.0, 0.0, -1.0);
         let aperture = 2.0;
         let distance_to_focus = (lookfrom - lookat).length();
@@ -69,13 +69,15 @@ impl Demo for DefocusBlur {
         world: Option<&HitableList>,
         samples: u8,
     ) {
-        let x = chunk.x;
-        let y = chunk.y;
-        let nx = chunk.nx;
-        let ny = chunk.ny;
-        let start_x = chunk.start_x;
-        let start_y = chunk.start_y;
-        let buffer = &mut chunk.buffer;
+        let &mut Chunk {
+            x,
+            y,
+            nx,
+            ny,
+            start_x,
+            start_y,
+            ref mut buffer,
+        } = chunk;
         let camera = camera.unwrap();
         let world = world.unwrap();
 

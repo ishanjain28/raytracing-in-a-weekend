@@ -26,13 +26,15 @@ impl Demo for HitableSphere {
         world: Option<&HitableList>,
         _samples: u8,
     ) {
-        let x = chunk.x;
-        let y = chunk.y;
-        let nx = chunk.nx;
-        let ny = chunk.ny;
-        let start_x = chunk.start_x;
-        let start_y = chunk.start_y;
-        let buffer = &mut chunk.buffer;
+        let &mut Chunk {
+            x,
+            y,
+            nx,
+            ny,
+            start_x,
+            start_y,
+            ref mut buffer,
+        } = chunk;
         let world = world.unwrap();
 
         let lower_left_corner = Vec3::new(-2.0, -1.0, -1.0);

@@ -17,3 +17,9 @@ impl Hitable for HitableList {
         hit_rec
     }
 }
+
+impl HitableList {
+    pub fn push(&mut self, obj: Box<dyn Hitable>) {
+        self.list.push(obj);
+    }
+}

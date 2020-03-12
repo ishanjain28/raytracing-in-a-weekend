@@ -1,6 +1,7 @@
 mod defocus_blur;
 mod dielectric_material;
 mod diffuse_materials;
+mod final_scene;
 mod hitable_sphere;
 mod linear_gradient_rectangle;
 mod materials;
@@ -13,6 +14,7 @@ mod surface_normal_sphere;
 pub use defocus_blur::DefocusBlur;
 pub use dielectric_material::DielectricMaterial;
 pub use diffuse_materials::DiffuseMaterials;
+pub use final_scene::FinalScene;
 pub use hitable_sphere::HitableSphere;
 pub use linear_gradient_rectangle::LinearGradientRectangle;
 pub use materials::Materials;
@@ -35,7 +37,6 @@ use {
     },
 };
 
-#[derive(Debug)]
 pub struct Chunk {
     x: usize,
     y: usize,

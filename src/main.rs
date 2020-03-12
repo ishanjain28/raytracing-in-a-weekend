@@ -23,8 +23,7 @@ const HORIZONTAL_PARTITION: usize = 8;
 fn main() -> Result<(), String> {
     let sdl_ctx = sdl2::init()?;
     let video_subsys = sdl_ctx.video()?;
-
-    let (mut width, mut height) = (1280usize, 640usize);
+    let (mut width, mut height): (usize, usize) = (1600, 800);
 
     let window = video_subsys
         .window("Ray tracing in a weekend", width as u32, height as u32)
@@ -81,6 +80,7 @@ fn main() -> Result<(), String> {
                         Some(Keycode::Num9) => active_demo = Box::new(demos::DielectricMaterial),
                         Some(Keycode::Num0) => active_demo = Box::new(demos::PositionableCamera),
                         Some(Keycode::Minus) => active_demo = Box::new(demos::DefocusBlur),
+                        Some(Keycode::Equals) => active_demo = Box::new(demos::FinalScene),
                         None => unreachable!(),
                         _ => (),
                     };

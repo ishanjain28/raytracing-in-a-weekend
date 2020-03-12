@@ -45,8 +45,8 @@ impl Camera {
             - u * focus_distance * half_width
             - v * focus_distance * half_height
             - w * focus_distance;
-        let horizontal = u * half_width * 2.0;
-        let vertical = v * half_height * 2.0;
+        let horizontal = u * half_width * focus_distance * 2.0;
+        let vertical = v * half_height * focus_distance * 2.0;
         let lens_radius = aperture / 2.0;
 
         Self {
@@ -73,7 +73,7 @@ impl Camera {
 }
 
 fn random_in_unit_disk(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
-    let mut p = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), 0.0) * 2.0 - Vec3::new(1.0, 0.0, 0.0);
+    let mut p = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), 0.0) * 2.0 - Vec3::new(1.0, 1.0, 0.0);
 
     while p.dot(&p) >= 1.0 {
         p = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), 0.0) * 2.0 - Vec3::new(1.0, 0.0, 0.0);

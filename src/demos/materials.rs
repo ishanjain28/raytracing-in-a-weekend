@@ -14,7 +14,7 @@ pub struct Materials;
 
 impl Demo for Materials {
     fn name(&self) -> &'static str {
-        "metal-material"
+        "materials"
     }
 
     fn world(&self) -> Option<HitableList> {

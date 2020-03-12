@@ -93,7 +93,6 @@ impl Demo for FinalScene {
             Box::new(Metal::with_fuzz(Vec3::new(0.7, 0.6, 0.5), 0.0)),
         )));
 
-        println!("world size = {}", world.list.len());
         Some(world)
     }
 

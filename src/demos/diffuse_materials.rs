@@ -1,10 +1,11 @@
 use {
     crate::{
         demos::{Chunk, Demo},
-        types::{Hitable, HitableList, Ray, Sphere, Vec3},
+        types::{Hitable, HitableList, Ray, Sphere},
         Camera,
     },
     rand::Rng,
+    ultraviolet::vec::Vec3,
 };
 
 pub struct DiffuseMaterials;
@@ -49,13 +50,13 @@ impl Demo for DiffuseMaterials {
                 let mut color = Vec3::new(0.0, 0.0, 0.0);
 
                 for _s in 0..samples {
-                    let u = (i as f64 + rng.gen::<f64>()) / x as f64;
-                    let v = (j as f64 + rng.gen::<f64>()) / y as f64;
+                    let u = (i as f32 + rng.gen::<f32>()) / x as f32;
+                    let v = (j as f32 + rng.gen::<f32>()) / y as f32;
                     let r = camera.get_ray(u, v);
                     color += calc_color(r, &world, &mut rng);
                 }
 
-                color /= samples as f64;
+                color /= samples as f32;
 
                 // Without taking square root of each color, we get a picture that
                 // is quite dark
@@ -63,9 +64,9 @@ impl Demo for DiffuseMaterials {
                 // So, IRL, It *should* look a bit lighter in color
                 // To do that, We apply gamma correction by a factor of 2
                 // which means multiple rgb values by 1/gamma aka 1/2
-                buffer[offset] = (255.99 * color.r().sqrt()) as u8;
-                buffer[offset + 1] = (255.99 * color.g().sqrt()) as u8;
-                buffer[offset + 2] = (255.99 * color.b().sqrt()) as u8;
+                buffer[offset] = (255.99 * color.x.sqrt()) as u8;
+                buffer[offset + 1] = (255.99 * color.y.sqrt()) as u8;
+                buffer[offset + 2] = (255.99 * color.z.sqrt()) as u8;
                 offset += 4;
             }
         }
@@ -73,25 +74,25 @@ impl Demo for DiffuseMaterials {
 }
 
 fn calc_color(ray: Ray, world: &HitableList, rng: &mut rand::rngs::ThreadRng) -> Vec3 {
-    // The value of t_min here could've been 0.0 but since f32/f64 can only be
+    // The value of t_min here could've been 0.0 but since f32/f32 can only be
     // partially compared, It may cause shadow acne effect.
     // To combat this problem, We set a bias
     // More information here, https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/#shadow-acne
-    if let Some(hit_rec) = world.hit(&ray, 0.001, std::f64::MAX) {
+    if let Some(hit_rec) = world.hit(&ray, 0.001, std::f32::MAX) {
         let target = hit_rec.p + hit_rec.normal + random_point_in_unit_sphere(rng);
         calc_color(Ray::new(hit_rec.p, target - hit_rec.p), &world, rng) * 0.5
     } else {
-        let unit_direction = ray.direction().unit_vector();
-        let t = 0.5 * (unit_direction.y() + 1.0);
+        let unit_direction = ray.direction().normalized();
+        let t = 0.5 * (unit_direction.y + 1.0);
         Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
     }
 }
 
 fn random_point_in_unit_sphere(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
-    let mut point = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>()) * 2.0
+    let mut point = Vec3::new(rng.gen::<f32>(), rng.gen::<f32>(), rng.gen::<f32>()) * 2.0
         - Vec3::new(1.0, 1.0, 1.0);
-    while point.sq_len() >= 1.0 {
-        point = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>()) * 2.0
+    while point.mag_sq() >= 1.0 {
+        point = Vec3::new(rng.gen::<f32>(), rng.gen::<f32>(), rng.gen::<f32>()) * 2.0
             - Vec3::new(1.0, 1.0, 1.0);
     }
     point

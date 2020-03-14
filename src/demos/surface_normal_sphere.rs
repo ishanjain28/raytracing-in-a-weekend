@@ -1,10 +1,13 @@
-use crate::{
-    demos::{Chunk, Demo},
-    types::{HitableList, Ray, Vec3},
-    Camera,
+use {
+    crate::{
+        demos::{Chunk, Demo},
+        types::{HitableList, Ray},
+        Camera,
+    },
+    ultraviolet::vec::Vec3,
 };
 
-const RADIUS: f64 = 0.5;
+const RADIUS: f32 = 0.5;
 pub struct SurfaceNormalSphere;
 
 impl Demo for SurfaceNormalSphere {
@@ -48,14 +51,14 @@ impl Demo for SurfaceNormalSphere {
 
         for j in start_y..start_y + ny {
             for i in start_x..start_x + nx {
-                let u = i as f64 / x as f64;
-                let v = j as f64 / y as f64;
+                let u = i as f32 / x as f32;
+                let v = j as f32 / y as f32;
 
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
                 let color = calculate_color(ray);
-                let ir = (255.99 * color.r()) as u8;
-                let ig = (255.99 * color.g()) as u8;
-                let ib = (255.99 * color.b()) as u8;
+                let ir = (255.99 * color.x) as u8;
+                let ig = (255.99 * color.y) as u8;
+                let ib = (255.99 * color.z) as u8;
 
                 buffer[offset] = ir;
                 buffer[offset + 1] = ig;
@@ -69,23 +72,23 @@ impl Demo for SurfaceNormalSphere {
 fn calculate_color(ray: Ray) -> Vec3 {
     let t = ray_hit_sphere(Vec3::new(0.0, 0.0, -1.0), RADIUS, &ray);
     if t > 0.0 {
-        let n = (ray.point_at_parameter(t) - Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        return Vec3::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0) * 0.5;
+        let n = (ray.point_at_parameter(t) - Vec3::new(0.0, 0.0, -1.0)).normalized();
+        return Vec3::new(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5;
     }
-    let unit_direction = ray.direction().unit_vector();
+    let unit_direction = ray.direction().normalized();
     // For rays that don't hit sphere, It'll paint the gradient as the background
     // Linear gradient depends on y
-    let t = 0.5 * unit_direction.y() + 1.0;
+    let t = 0.5 * unit_direction.y + 1.0;
 
     // start color + end color
     Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
 }
 
-fn ray_hit_sphere(center: Vec3, radius: f64, ray: &Ray) -> f64 {
+fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> f32 {
     let pc = ray.origin() - center;
-    let a = ray.direction().dot(&ray.direction());
-    let b = 2.0 * pc.dot(&ray.direction());
-    let c = pc.dot(&pc) - radius * radius;
+    let a = ray.direction().dot(ray.direction());
+    let b = 2.0 * pc.dot(ray.direction());
+    let c = pc.dot(pc) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
 
     if discriminant >= 0.0 {

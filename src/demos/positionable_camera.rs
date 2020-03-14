@@ -3,11 +3,12 @@ use {
         demos::{Chunk, Demo},
         types::{
             material::{Dielectric, Lambertian, Metal},
-            Hitable, HitableList, Ray, Sphere, Vec3,
+            Hitable, HitableList, Ray, Sphere,
         },
         Camera,
     },
     rand::Rng,
+    ultraviolet::vec::Vec3,
 };
 
 pub struct PositionableCamera;
@@ -18,7 +19,7 @@ impl Demo for PositionableCamera {
     }
 
     fn world(&self) -> Option<HitableList> {
-        let radius = (std::f64::consts::PI / 4.0).cos();
+        let radius = (std::f32::consts::PI / 4.0).cos();
         Some(HitableList {
             list: vec![
                 Box::new(Sphere::with_material(
@@ -45,7 +46,7 @@ impl Demo for PositionableCamera {
         })
     }
 
-    fn camera(&self, aspect_ratio: f64) -> Option<Camera> {
+    fn camera(&self, aspect_ratio: f32) -> Option<Camera> {
         let lookfrom = Vec3::new(-2.0, 2.0, 1.0);
         let lookat = Vec3::new(0.0, 0.0, -1.0);
         Some(Camera::new(
@@ -84,17 +85,17 @@ impl Demo for PositionableCamera {
             for i in start_x..start_x + nx {
                 let mut color = Vec3::new(0.0, 0.0, 0.0);
                 for _s in 0..samples {
-                    let u = (i as f64 + rng.gen::<f64>()) / x as f64;
-                    let v = (j as f64 + rng.gen::<f64>()) / y as f64;
+                    let u = (i as f32 + rng.gen::<f32>()) / x as f32;
+                    let v = (j as f32 + rng.gen::<f32>()) / y as f32;
 
                     let ray = camera.get_ray(u, v);
                     color += calc_color(ray, &world, 0);
                 }
-                color /= samples as f64;
+                color /= samples as f32;
                 // gamma 2 corrected
-                buffer[offset] = (255.99 * color.r().sqrt()) as u8;
-                buffer[offset + 1] = (255.99 * color.g().sqrt()) as u8;
-                buffer[offset + 2] = (255.99 * color.b().sqrt()) as u8;
+                buffer[offset] = (255.99 * color.x.sqrt()) as u8;
+                buffer[offset + 1] = (255.99 * color.y.sqrt()) as u8;
+                buffer[offset + 2] = (255.99 * color.z.sqrt()) as u8;
                 offset += 4;
             }
         }
@@ -102,7 +103,7 @@ impl Demo for PositionableCamera {
 }
 
 fn calc_color(ray: Ray, world: &HitableList, depth: u32) -> Vec3 {
-    if let Some(hit_rec) = world.hit(&ray, 0.001, std::f64::MAX) {
+    if let Some(hit_rec) = world.hit(&ray, 0.001, std::f32::MAX) {
         if depth >= 50 {
             Vec3::new(0.0, 0.0, 0.0)
         } else {
@@ -114,8 +115,8 @@ fn calc_color(ray: Ray, world: &HitableList, depth: u32) -> Vec3 {
             }
         }
     } else {
-        let unit_direction = ray.direction().unit_vector();
-        let t = 0.5 * (unit_direction.y() + 1.0);
+        let unit_direction = ray.direction().normalized();
+        let t = 0.5 * (unit_direction.y + 1.0);
         Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
     }
 }

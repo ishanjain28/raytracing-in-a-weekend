@@ -25,16 +25,14 @@ pub use simple_sphere::SimpleSphere;
 pub use surface_normal_sphere::SurfaceNormalSphere;
 
 use {
-    crate::{
-        types::{HitableList, Vec3},
-        Camera, HORIZONTAL_PARTITION, VERTICAL_PARTITION,
-    },
+    crate::{types::HitableList, Camera, HORIZONTAL_PARTITION, VERTICAL_PARTITION},
     rayon::prelude::*,
     std::{
         fs::File,
         io::Write,
         sync::{Arc, Mutex},
     },
+    ultraviolet::vec::Vec3,
 };
 
 pub struct Chunk {
@@ -52,7 +50,7 @@ pub trait Demo: std::marker::Sync {
         let nx = width / VERTICAL_PARTITION;
         let ny = height / HORIZONTAL_PARTITION;
         let world = self.world();
-        let camera = self.camera(nx as f64 / ny as f64);
+        let camera = self.camera(nx as f32 / ny as f32);
 
         let buf = Arc::new(Mutex::new(buf));
 
@@ -93,7 +91,7 @@ pub trait Demo: std::marker::Sync {
         None
     }
 
-    fn camera(&self, aspect_ratio: f64) -> Option<Camera> {
+    fn camera(&self, aspect_ratio: f32) -> Option<Camera> {
         let lookfrom = Vec3::new(0.0, 0.0, 0.0);
         let lookat = Vec3::new(0.0, 0.0, -1.0);
         Some(Camera::new(

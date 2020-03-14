@@ -39,7 +39,7 @@ fn render(&self, buf: &mut vec<u8>, width: usize, height: usize, samples: u8) {
                 .into_par_iter()
                 .for_each(move |i| {
                     let world = self.world();
-                    let camera = self.camera(nx as f64 / ny as f64);
+                    let camera = self.camera(nx as f32 / ny as f32);
 
                     let start_y = j * ny;
                     let start_x = i * nx;

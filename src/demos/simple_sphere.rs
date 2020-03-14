@@ -1,10 +1,13 @@
-use crate::{
-    demos::{Chunk, Demo},
-    types::{HitableList, Ray, Vec3},
-    Camera,
+use {
+    crate::{
+        demos::{Chunk, Demo},
+        types::{HitableList, Ray},
+        Camera,
+    },
+    ultraviolet::vec::Vec3,
 };
 
-const RADIUS: f64 = 0.5;
+const RADIUS: f32 = 0.5;
 
 pub struct SimpleSphere;
 
@@ -51,21 +54,21 @@ impl Demo for SimpleSphere {
             for i in start_x..start_x + nx {
                 // relative offsets
                 // current position to total width/length
-                let u = i as f64 / x as f64;
-                let v = j as f64 / y as f64;
+                let u = i as f32 / x as f32;
+                let v = j as f32 / y as f32;
 
                 let ray = Ray::new(origin, lower_left_corner + horizontal * u + vertical * v);
                 let color = calc_color(ray);
-                buffer[offset] = (255.99 * color.r()) as u8;
-                buffer[offset + 1] = (255.99 * color.g()) as u8;
-                buffer[offset + 2] = (255.99 * color.b()) as u8;
+                buffer[offset] = (255.99 * color.x) as u8;
+                buffer[offset + 1] = (255.99 * color.y) as u8;
+                buffer[offset + 2] = (255.99 * color.z) as u8;
                 offset += 4;
             }
         }
     }
 }
 
-fn ray_hit_sphere(center: Vec3, radius: f64, ray: &Ray) -> bool {
+fn ray_hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> bool {
     // For a point to lie on a circle,
     // (x-cx)^2 + (y-cy)^2 + (z-cz)^2 = R * R
     // should hold true. This equation can be rewritten as,
@@ -81,9 +84,9 @@ fn ray_hit_sphere(center: Vec3, radius: f64, ray: &Ray) -> bool {
     // Vector from circle center to point
     let ac = ray.origin() - center;
 
-    let a = ray.direction().dot(&ray.direction());
-    let b = 2.0 * ray.direction().dot(&ac);
-    let c = ac.dot(&ac) - radius * radius;
+    let a = ray.direction().dot(ray.direction());
+    let b = 2.0 * ray.direction().dot(ac);
+    let c = ac.dot(ac) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
 
     discriminant > 0.0
@@ -100,10 +103,10 @@ fn calc_color(ray: Ray) -> Vec3 {
         // This will result in a sphere that is red in color
         return Vec3::new(1.0, 0.0, 0.0);
     }
-    let unit_direction = ray.direction().unit_vector();
+    let unit_direction = ray.direction().normalized();
     // For rays that don't hit sphere, It'll paint the gradient as the background
     // Linear gradient depends on y
-    let t = 0.5 * unit_direction.y() + 1.0;
+    let t = 0.5 * unit_direction.y + 1.0;
 
     // start color + end color
     Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t

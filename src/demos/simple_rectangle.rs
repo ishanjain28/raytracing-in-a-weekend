@@ -31,7 +31,7 @@ impl Demo for SimpleRectangle {
 
         for j in start_y..start_y + ny {
             for i in start_x..start_x + nx {
-                let color = [i as f64 / x as f64, j as f64 / y as f64, 0.2];
+                let color = [i as f32 / x as f32, j as f32 / y as f32, 0.2];
                 buffer[offset] = (255.99 * color[0]) as u8;
                 buffer[offset + 1] = (255.99 * color[1]) as u8;
                 buffer[offset + 2] = (255.99 * color[2]) as u8;

@@ -1,20 +1,23 @@
-use crate::types::{HitRecord, Hitable, Material, Ray, Vec3};
+use {
+    crate::types::{HitRecord, Hitable, Material, Ray},
+    ultraviolet::vec::Vec3,
+};
 
 pub struct Sphere {
     center: Vec3,
-    radius: f64,
+    radius: f32,
     material: Option<Box<dyn Material>>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64) -> Self {
+    pub fn new(center: Vec3, radius: f32) -> Self {
         Self {
             center,
             radius,
             material: None,
         }
     }
-    pub fn with_material(center: Vec3, radius: f64, material: Box<dyn Material>) -> Self {
+    pub fn with_material(center: Vec3, radius: f32, material: Box<dyn Material>) -> Self {
         Self {
             center,
             radius,
@@ -24,11 +27,11 @@ impl Sphere {
 }
 
 impl Hitable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let oc = ray.origin() - self.center;
-        let a = ray.direction().dot(&ray.direction());
-        let b = oc.dot(&ray.direction());
-        let c = oc.dot(&oc) - self.radius * self.radius;
+        let a = ray.direction().dot(ray.direction());
+        let b = oc.dot(ray.direction());
+        let c = oc.dot(oc) - self.radius * self.radius;
 
         // The discriminant is calculated using b^2 - 4 * a * c
         // but in this specific case, If we put the equation in the

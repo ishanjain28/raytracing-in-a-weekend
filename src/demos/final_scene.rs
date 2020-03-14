@@ -3,11 +3,12 @@ use {
         demos::{Chunk, Demo},
         types::{
             material::{Dielectric, Lambertian, Metal},
-            Hitable, HitableList, Ray, Sphere, Vec3,
+            Hitable, HitableList, Ray, Sphere,
         },
         Camera,
     },
     rand::Rng,
+    ultraviolet::vec::Vec3,
 };
 
 pub struct FinalScene;
@@ -33,22 +34,22 @@ impl Demo for FinalScene {
         let l = Vec3::new(4.0, 0.2, 0.0);
 
         for a in -11..11 {
-            let a = a as f64;
+            let a = a as f32;
             for b in -11..11 {
-                let b = b as f64;
-                let choose_material_probability = rng.gen::<f64>();
-                let center = Vec3::new(a + 0.9 * rng.gen::<f64>(), 0.2, b + 0.9 * rng.gen::<f64>());
+                let b = b as f32;
+                let choose_material_probability = rng.gen::<f32>();
+                let center = Vec3::new(a + 0.9 * rng.gen::<f32>(), 0.2, b + 0.9 * rng.gen::<f32>());
 
-                if (center - l).length() > 0.9 {
+                if (center - l).mag() > 0.9 {
                     if choose_material_probability < 0.8 {
                         // diffuse material
                         world.push(Box::new(Sphere::with_material(
                             center,
                             radius,
                             Box::new(Lambertian::new(Vec3::new(
-                                rng.gen::<f64>() * rng.gen::<f64>(),
-                                rng.gen::<f64>() * rng.gen::<f64>(),
-                                rng.gen::<f64>() * rng.gen::<f64>(),
+                                rng.gen::<f32>() * rng.gen::<f32>(),
+                                rng.gen::<f32>() * rng.gen::<f32>(),
+                                rng.gen::<f32>() * rng.gen::<f32>(),
                             ))),
                         )));
                     } else if choose_material_probability < 0.95 {
@@ -58,11 +59,11 @@ impl Demo for FinalScene {
                             radius,
                             Box::new(Metal::with_fuzz(
                                 Vec3::new(
-                                    (1.0 + rng.gen::<f64>()) * 0.5,
-                                    (1.0 + rng.gen::<f64>()) * 0.5,
-                                    (1.0 + rng.gen::<f64>()) * 0.5,
+                                    (1.0 + rng.gen::<f32>()) * 0.5,
+                                    (1.0 + rng.gen::<f32>()) * 0.5,
+                                    (1.0 + rng.gen::<f32>()) * 0.5,
                                 ),
-                                0.5 * rng.gen::<f64>(),
+                                0.5 * rng.gen::<f32>(),
                             )),
                         )));
                     } else {
@@ -96,7 +97,7 @@ impl Demo for FinalScene {
         Some(world)
     }
 
-    fn camera(&self, aspect_ratio: f64) -> Option<Camera> {
+    fn camera(&self, aspect_ratio: f32) -> Option<Camera> {
         let lookfrom = Vec3::new(13.0, 2.0, 3.0);
         let lookat = Vec3::new(0.0, 0.0, 0.0);
         let camera = Camera::new(
@@ -137,19 +138,19 @@ impl Demo for FinalScene {
             for i in start_x..start_x + nx {
                 let mut color = Vec3::new(0.0, 0.0, 0.0);
                 for _s in 0..samples {
-                    let u = (i as f64 + rng.gen::<f64>()) / x as f64;
-                    let v = (j as f64 + rng.gen::<f64>()) / y as f64;
+                    let u = (i as f32 + rng.gen::<f32>()) / x as f32;
+                    let v = (j as f32 + rng.gen::<f32>()) / y as f32;
 
                     let ray = camera.get_ray(u, v);
                     color += calc_color(ray, &world, 0);
                 }
 
-                color /= samples as f64;
+                color /= samples as f32;
 
                 // gamma 2 corrected
-                buffer[offset] = (255.99 * color.r().sqrt()) as u8;
-                buffer[offset + 1] = (255.99 * color.g().sqrt()) as u8;
-                buffer[offset + 2] = (255.99 * color.b().sqrt()) as u8;
+                buffer[offset] = (255.99 * color.x.sqrt()) as u8;
+                buffer[offset + 1] = (255.99 * color.y.sqrt()) as u8;
+                buffer[offset + 2] = (255.99 * color.z.sqrt()) as u8;
                 offset += 4;
             }
         }
@@ -157,7 +158,7 @@ impl Demo for FinalScene {
 }
 
 fn calc_color(ray: Ray, world: &HitableList, depth: u32) -> Vec3 {
-    if let Some(hit_rec) = world.hit(&ray, 0.001, std::f64::MAX) {
+    if let Some(hit_rec) = world.hit(&ray, 0.001, std::f32::MAX) {
         if depth >= 50 {
             Vec3::new(0.0, 0.0, 0.0)
         } else {
@@ -169,8 +170,8 @@ fn calc_color(ray: Ray, world: &HitableList, depth: u32) -> Vec3 {
             }
         }
     } else {
-        let unit_direction = ray.direction().unit_vector();
-        let t = 0.5 * (unit_direction.y() + 1.0);
+        let unit_direction = ray.direction().normalized();
+        let t = 0.5 * (unit_direction.y + 1.0);
         Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
     }
 }

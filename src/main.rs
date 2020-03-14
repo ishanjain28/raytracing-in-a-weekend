@@ -143,7 +143,7 @@ fn main() -> Result<(), String> {
             println!(
                 "Demo {} Time Taken(s) = {}",
                 active_demo.name(),
-                now.elapsed().as_secs_f64()
+                now.elapsed().as_secs_f32()
             );
 
             texture.update(None, &buffer, width * 4).unwrap();

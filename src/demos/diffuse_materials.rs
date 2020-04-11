@@ -4,7 +4,7 @@ use {
         types::{Hitable, HitableList, Ray, Sphere, Vec3},
         Camera,
     },
-    rand::Rng,
+    rand::{rngs::SmallRng, Rng, SeedableRng},
 };
 
 pub struct DiffuseMaterials;
@@ -43,7 +43,9 @@ impl Demo for DiffuseMaterials {
         let world = world.unwrap();
 
         let mut rng = rand::thread_rng();
+        let mut rng = SmallRng::from_rng(&mut rng).unwrap();
         let mut offset = 0;
+
         for j in start_y..start_y + ny {
             for i in start_x..start_x + nx {
                 let mut color = Vec3::new(0.0, 0.0, 0.0);
@@ -51,7 +53,7 @@ impl Demo for DiffuseMaterials {
                 for _s in 0..samples {
                     let u = (i as f64 + rng.gen::<f64>()) / x as f64;
                     let v = (j as f64 + rng.gen::<f64>()) / y as f64;
-                    let r = camera.get_ray(u, v);
+                    let r = camera.get_ray(u, v, &mut rng);
                     color += calc_color(r, &world, &mut rng);
                 }
 
@@ -72,7 +74,7 @@ impl Demo for DiffuseMaterials {
     }
 }
 
-fn calc_color(ray: Ray, world: &HitableList, rng: &mut rand::rngs::ThreadRng) -> Vec3 {
+fn calc_color(ray: Ray, world: &HitableList, rng: &mut SmallRng) -> Vec3 {
     // The value of t_min here could've been 0.0 but since f32/f64 can only be
     // partially compared, It may cause shadow acne effect.
     // To combat this problem, We set a bias
@@ -87,7 +89,7 @@ fn calc_color(ray: Ray, world: &HitableList, rng: &mut rand::rngs::ThreadRng) ->
     }
 }
 
-fn random_point_in_unit_sphere(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
+fn random_point_in_unit_sphere<R: Rng + ?Sized>(rng: &mut R) -> Vec3 {
     let mut point = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>()) * 2.0
         - Vec3::new(1.0, 1.0, 1.0);
     while point.sq_len() >= 1.0 {

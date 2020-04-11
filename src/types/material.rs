@@ -1,10 +1,10 @@
 use {
     crate::types::{HitRecord, Ray, Vec3},
-    rand::Rng,
+    rand::{rngs::SmallRng, Rng},
 };
 
 pub trait Material: Send + Sync {
-    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord) -> (Vec3, Option<Ray>);
+    fn scatter(&self, ray: &Ray, hit_rec: &HitRecord, rng: &mut SmallRng) -> (Vec3, Option<Ray>);
 }
 
 pub struct Lambertian {
@@ -18,9 +18,8 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ray: &Ray, hit_rec: &HitRecord) -> (Vec3, Option<Ray>) {
-        let mut rng = rand::thread_rng();
-        let target = hit_rec.p + hit_rec.normal + random_point_in_unit_sphere(&mut rng);
+    fn scatter(&self, _ray: &Ray, hit_rec: &HitRecord, rng: &mut SmallRng) -> (Vec3, Option<Ray>) {
+        let target = hit_rec.p + hit_rec.normal + random_point_in_unit_sphere(rng);
         let scattered_ray = Ray::new(hit_rec.p, target - hit_rec.p);
 
         (self.albedo, Some(scattered_ray))
@@ -42,13 +41,16 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, ray_in: &Ray, hit_rec: &HitRecord) -> (Vec3, Option<Ray>) {
-        let mut rng = rand::thread_rng();
-
+    fn scatter(
+        &self,
+        ray_in: &Ray,
+        hit_rec: &HitRecord,
+        rng: &mut SmallRng,
+    ) -> (Vec3, Option<Ray>) {
         let reflected_ray = reflect(ray_in.direction().unit_vector(), hit_rec.normal);
         let scattered_ray = Ray::new(
             hit_rec.p,
-            reflected_ray + random_point_in_unit_sphere(&mut rng) * self.fuzz,
+            reflected_ray + random_point_in_unit_sphere(rng) * self.fuzz,
         );
 
         if scattered_ray.direction().dot(&hit_rec.normal) > 0.0 {
@@ -70,11 +72,15 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, ray_in: &Ray, hit_rec: &HitRecord) -> (Vec3, Option<Ray>) {
+    fn scatter(
+        &self,
+        ray_in: &Ray,
+        hit_rec: &HitRecord,
+        rng: &mut SmallRng,
+    ) -> (Vec3, Option<Ray>) {
         let reflected_ray = reflect(ray_in.direction(), hit_rec.normal);
         // Glass absorbs nothing! So, Attenuation is always going to be 1.0 for this
         let attenuation = Vec3::new(1.0, 1.0, 1.0);
-        let mut rng = rand::thread_rng();
 
         let (outward_normal, ni_over_nt, cosine) = if ray_in.direction().dot(&hit_rec.normal) > 0.0
         {
@@ -130,7 +136,7 @@ fn refract(incident: Vec3, normal: Vec3, ni_over_nt: f64) -> Option<Vec3> {
     }
 }
 
-fn random_point_in_unit_sphere(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
+fn random_point_in_unit_sphere<R: Rng + ?Sized>(rng: &mut R) -> Vec3 {
     let mut point = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>()) * 2.0
         - Vec3::new(1.0, 1.0, 1.0);
     while point.sq_len() >= 1.0 {

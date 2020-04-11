@@ -24,6 +24,7 @@ impl Sphere {
 }
 
 impl Hitable for Sphere {
+    #[inline]
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc = ray.origin() - self.center;
         let a = ray.direction().dot(&ray.direction());
@@ -38,9 +39,9 @@ impl Hitable for Sphere {
         // https://vchizhov.github.io/resources/ray%20tracing/ray%20tracing%20tutorial%20series%20vchizhov/ray_casting/part1/intersecting_a_sphere.md.html#appendix
         let discriminant = b * b - a * c;
         let discriminant_root = discriminant.sqrt();
-
+        let a_d = 1.0 / a;
         if discriminant > 0.0 {
-            let root = (-b - discriminant_root) / a;
+            let root = (-b - discriminant_root) * a_d;
             if root < t_max && root > t_min {
                 let p = ray.point_at_parameter(root);
                 return Some(HitRecord {
@@ -51,7 +52,7 @@ impl Hitable for Sphere {
                 });
             }
 
-            let root = (-b + discriminant_root) / a;
+            let root = (-b + discriminant_root) * a_d;
             if root < t_max && root > t_min {
                 let p = ray.point_at_parameter(root);
 

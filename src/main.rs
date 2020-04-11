@@ -6,25 +6,28 @@ mod types;
 
 pub use camera::Camera;
 
-use {
-    demos::Demo,
-    sdl2::{
-        event::{Event, WindowEvent},
-        keyboard::Keycode,
-        pixels::PixelFormatEnum,
-    },
-    std::time::Instant,
-};
+use {demos::Demo, std::time::Instant};
 
 const NUM_SAMPLES: u8 = 100;
 const VERTICAL_PARTITION: usize = 8;
 const HORIZONTAL_PARTITION: usize = 8;
+const WIDTH: usize = 800;
+const HEIGHT: usize = 400;
 
 fn main() -> Result<(), String> {
+    run(WIDTH, HEIGHT)
+}
+
+#[cfg(feature = "gui")]
+fn run(mut width: usize, mut height: usize) -> Result<(), String> {
+    use sdl2::{
+        event::{Event, WindowEvent},
+        keyboard::Keycode,
+        pixels::PixelFormatEnum,
+    };
+
     let sdl_ctx = sdl2::init()?;
     let video_subsys = sdl_ctx.video()?;
-    let (mut width, mut height): (usize, usize) = (1600, 800);
-
     let window = video_subsys
         .window("Ray tracing in a weekend", width as u32, height as u32)
         .position_centered()
@@ -49,7 +52,7 @@ fn main() -> Result<(), String> {
 
     //println!("{:?} {:?} {:?}", texture.query(), texture.color_mod(), texture.alpha_mod());
 
-    let mut active_demo: &dyn Demo = &demos::SimpleRectangle;
+    let active_demo: &dyn Demo = &demos::MotionBlur;
     // TODO: Should update when window is unfocus since the project window retains
     // data from overlapped window
     // TODO: Maybe consider using condition variable to make loop {} not run at full
@@ -118,8 +121,6 @@ fn main() -> Result<(), String> {
                             active_demo = &demos::FinalScene;
                             should_update = true;
                         }
-                        None => unreachable!(),
-                        _ => (),
                     };
                 }
                 Event::Window {
@@ -152,4 +153,43 @@ fn main() -> Result<(), String> {
             should_update = false;
         }
     }
+}
+
+#[cfg(not(feature = "gui"))]
+fn run(width: usize, height: usize) -> Result<(), String> {
+    let mut buffer = vec![0; width * height * 4];
+    let list_of_demos: [Box<dyn Demo>; 12] = [
+        Box::new(demos::SimpleRectangle),
+        Box::new(demos::LinearGradientRectangle),
+        Box::new(demos::SimpleSphere),
+        Box::new(demos::SurfaceNormalSphere),
+        Box::new(demos::HitableSphere),
+        Box::new(demos::SimpleAntialiasing),
+        Box::new(demos::DiffuseMaterials),
+        Box::new(demos::Materials),
+        Box::new(demos::DielectricMaterial),
+        Box::new(demos::PositionableCamera),
+        Box::new(demos::DefocusBlur),
+        Box::new(demos::FinalScene),
+    ];
+    for demo in list_of_demos.iter() {
+        println!(
+            "Starting {} at {}x{} with {} samples",
+            demo.name(),
+            width,
+            height,
+            NUM_SAMPLES
+        );
+        let now = Instant::now();
+        demo.render(&mut buffer, width, height, NUM_SAMPLES);
+        println!(
+            "Rendered Demo {}. Time Taken(s) = {}",
+            demo.name(),
+            now.elapsed().as_secs_f64()
+        );
+
+        demo.save_as_ppm(&buffer, width, height);
+    }
+
+    Ok(())
 }

@@ -61,9 +61,8 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
-        let mut rng = rand::thread_rng();
-        let rd = random_in_unit_disk(&mut rng) * self.lens_radius;
+    pub fn get_ray<R: Rng + ?Sized>(&self, u: f64, v: f64, rng: &mut R) -> Ray {
+        let rd = random_in_unit_disk(rng) * self.lens_radius;
         let offset = self.u * rd.x() + self.v * rd.y();
         Ray::new(
             self.origin + offset,
@@ -72,7 +71,7 @@ impl Camera {
     }
 }
 
-fn random_in_unit_disk(rng: &mut rand::rngs::ThreadRng) -> Vec3 {
+fn random_in_unit_disk<R: Rng + ?Sized>(rng: &mut R) -> Vec3 {
     let mut p = Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), 0.0) * 2.0 - Vec3::new(1.0, 1.0, 0.0);
 
     while p.dot(&p) >= 1.0 {

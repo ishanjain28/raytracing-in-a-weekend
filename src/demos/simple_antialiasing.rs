@@ -4,7 +4,7 @@ use {
         types::{Hitable, HitableList, Ray, Sphere, Vec3},
         Camera,
     },
-    rand::Rng,
+    rand::{rngs::SmallRng, Rng, SeedableRng},
 };
 pub struct SimpleAntialiasing;
 
@@ -41,6 +41,7 @@ impl Demo for SimpleAntialiasing {
         let camera = camera.unwrap();
 
         let mut rng = rand::thread_rng();
+        let mut rng = SmallRng::from_rng(&mut rng).unwrap();
         let mut offset = 0;
 
         for j in start_y..start_y + ny {
@@ -50,7 +51,7 @@ impl Demo for SimpleAntialiasing {
                     let u = (i as f64 + rng.gen::<f64>()) / x as f64;
                     let v = (j as f64 + rng.gen::<f64>()) / y as f64;
 
-                    let r = camera.get_ray(u, v);
+                    let r = camera.get_ray(u, v, &mut rng);
                     color += calc_color(r, world.unwrap());
                 }
                 color /= samples as f64;

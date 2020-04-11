@@ -7,7 +7,7 @@ use {
         },
         Camera,
     },
-    rand::Rng,
+    rand::{rngs::SmallRng, Rng, SeedableRng},
 };
 
 pub struct PositionableCamera;
@@ -78,6 +78,7 @@ impl Demo for PositionableCamera {
         let camera = camera.unwrap();
         let world = world.unwrap();
         let mut rng = rand::thread_rng();
+        let mut rng = SmallRng::from_rng(&mut rng).unwrap();
         let mut offset = 0;
 
         for j in start_y..start_y + ny {
@@ -87,8 +88,8 @@ impl Demo for PositionableCamera {
                     let u = (i as f64 + rng.gen::<f64>()) / x as f64;
                     let v = (j as f64 + rng.gen::<f64>()) / y as f64;
 
-                    let ray = camera.get_ray(u, v);
-                    color += calc_color(ray, &world, 0);
+                    let ray = camera.get_ray(u, v, &mut rng);
+                    color += calc_color(ray, &world, 0, &mut rng);
                 }
                 color /= samples as f64;
                 // gamma 2 corrected
@@ -101,14 +102,16 @@ impl Demo for PositionableCamera {
     }
 }
 
-fn calc_color(ray: Ray, world: &HitableList, depth: u32) -> Vec3 {
+fn calc_color(ray: Ray, world: &HitableList, depth: u32, rng: &mut SmallRng) -> Vec3 {
     if let Some(hit_rec) = world.hit(&ray, 0.001, std::f64::MAX) {
         if depth >= 50 {
             Vec3::new(0.0, 0.0, 0.0)
         } else {
             let material = hit_rec.material.as_ref();
-            if let (attenuation, Some(scattered_ray)) = material.unwrap().scatter(&ray, &hit_rec) {
-                calc_color(scattered_ray, &world, depth + 1) * attenuation
+            if let (attenuation, Some(scattered_ray)) =
+                material.unwrap().scatter(&ray, &hit_rec, rng)
+            {
+                calc_color(scattered_ray, &world, depth + 1, rng) * attenuation
             } else {
                 Vec3::new(0.0, 0.0, 0.0)
             }

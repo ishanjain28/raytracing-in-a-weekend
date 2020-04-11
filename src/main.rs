@@ -52,7 +52,7 @@ fn run(mut width: usize, mut height: usize) -> Result<(), String> {
 
     //println!("{:?} {:?} {:?}", texture.query(), texture.color_mod(), texture.alpha_mod());
 
-    let active_demo: &dyn Demo = &demos::MotionBlur;
+    let mut active_demo: &dyn Demo = &demos::SimpleRectangle;
     // TODO: Should update when window is unfocus since the project window retains
     // data from overlapped window
     // TODO: Maybe consider using condition variable to make loop {} not run at full
@@ -121,6 +121,7 @@ fn run(mut width: usize, mut height: usize) -> Result<(), String> {
                             active_demo = &demos::FinalScene;
                             should_update = true;
                         }
+                        _ => (),
                     };
                 }
                 Event::Window {

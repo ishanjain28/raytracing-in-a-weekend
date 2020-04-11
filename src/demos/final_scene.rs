@@ -159,7 +159,7 @@ impl Demo for FinalScene {
 
 fn calc_color(ray: Ray, world: &HitableList, depth: u32, rng: &mut SmallRng) -> Vec3 {
     if let Some(hit_rec) = world.hit(&ray, 0.001, std::f64::MAX) {
-        if depth >= 10 {
+        if depth >= 50 {
             Vec3::new(0.0, 0.0, 0.0)
         } else {
             let material = hit_rec.material.as_ref();
